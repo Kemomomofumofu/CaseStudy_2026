@@ -6,7 +6,7 @@ public class Goal : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("PlayerRoot"))
+        if (other.CompareTag("PlayerRoot")) //プレイヤーモデル　タグ
         {
             clearUI.SetActive(true);
             Time.timeScale = 0f; // ゲーム停止（任意）

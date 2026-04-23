@@ -620,6 +620,10 @@ PrefabInstance:
       propertyPath: clearUI
       value: 
       objectReference: {fileID: 1304386751}
+    - target: {fileID: 7850187557412144846, guid: 9dafc044b68ef2446bf77f229bcf1208, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
