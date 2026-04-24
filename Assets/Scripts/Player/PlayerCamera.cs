@@ -1,6 +1,5 @@
 using UnityEngine;
 
-/// <summary>
 /// プレイヤーカメラ
 /// </summary>
 public class PlayerCamera : MonoBehaviour
@@ -12,6 +11,9 @@ public class PlayerCamera : MonoBehaviour
     [Tooltip("カメラオフセット")]
     [SerializeField] private Vector3 followOffset = new(0f, 5f, -10f);
 
+    [Tooltip("カメラ回転オフセット")]
+    [SerializeField] private Vector3 followRotationOffset = new(0f, 5f, 90f);
+
     [Tooltip("注視点オフセット（プレイヤーローカル座標）")]
     [SerializeField] private Vector3 lookAtOffset = new(0f, 1f, 0f);
 
@@ -20,6 +22,7 @@ public class PlayerCamera : MonoBehaviour
 
     [Tooltip("回転追従のスムーズさ")]
     [SerializeField] private float rotationSmoothTime = 0.1f;
+
 
     private Vector3 followVelocity = Vector3.zero; // 位置追従の速度
     #endregion // メンバ変数
@@ -35,6 +38,7 @@ public class PlayerCamera : MonoBehaviour
 
         // 初期位置
         transform.position = target.TransformPoint(followOffset);
+     
 
         // 初期回転
         var lookTarget = target.TransformPoint(lookAtOffset);
@@ -60,11 +64,26 @@ public class PlayerCamera : MonoBehaviour
         var lookTarget = target.TransformPoint(lookAtOffset);
 
         // 回転目標は目標位置基準で作るとブレにくい
-        var desiredRotation = Quaternion.LookRotation(lookTarget - desiredPosition, Vector3.up);
+        var desiredRotation = Quaternion.LookRotation(lookTarget - desiredPosition, transform.up);
+
+        Quaternion baseRotation = Quaternion.LookRotation(lookTarget - desiredPosition, Vector3.up);
+
+
+        //和田:AngleAxis(0, Vector3.forward);の10の部分を可変するZ軸の値にすればOK
+        Quaternion roll = Quaternion.AngleAxis(10, Vector3.forward);
+
 
         // smoothTime ベースの補間率に変換
         var t = ToSmoothLerpFactor(rotationSmoothTime, Time.deltaTime);
+
         transform.rotation = Quaternion.Slerp(transform.rotation, desiredRotation, t);
+
+
+        transform.rotation = baseRotation * roll;
+
+
+
+
     }
     #endregion // Unityイベント
 
