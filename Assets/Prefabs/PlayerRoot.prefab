@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 6273686575019483118}
   - component: {fileID: 5229227408985624368}
   - component: {fileID: 2447126736259516466}
-  - component: {fileID: 6655762542224124656}
   m_Layer: 0
   m_Name: Front
   m_TagString: Untagged
@@ -91,27 +90,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &6655762542224124656
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 266402869016106017}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &4063187456420582864
 GameObject:
   m_ObjectHideFlags: 0
@@ -263,10 +241,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCamera
   target: {fileID: 878697168530936803}
-  followOffset: {x: 0, y: 10, z: -10}
-  lookAtOffset: {x: 0, y: 1, z: 0}
-  positionSmoothTime: 0.1
-  rotationSmoothTime: 1e+15
+  followOffset: {x: 0, y: 5, z: -10}
+  lookAtOffset: {x: 0, y: 2, z: 0}
+  positionSmoothTime: 0.2
+  rotationSmoothTime: 0.1
 --- !u!1 &4489111264671963074
 GameObject:
   m_ObjectHideFlags: 0
@@ -276,6 +254,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7800676597397011019}
+  - component: {fileID: 2430153222559673864}
+  - component: {fileID: 5374435262958340588}
+  - component: {fileID: 7473907412388259885}
+  - component: {fileID: 2196450369251709988}
   m_Layer: 0
   m_Name: PlayerRoot
   m_TagString: Untagged
@@ -300,6 +282,99 @@ Transform:
   - {fileID: 8003408120730304368}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &2430153222559673864
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4489111264671963074}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 2}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &5374435262958340588
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4489111264671963074}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a6facb05b4df414c8582c132ba60c61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadSignReceiver
+--- !u!54 &7473907412388259885
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4489111264671963074}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!114 &2196450369251709988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4489111264671963074}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78991e03d68dcd6418a1f38eb5a404e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerController
+  initialLane: {fileID: 0}
+  initialS: 0
+  moveSpeed: 10
+  rotateSpeed: 8
+  obstacleCheckMargin: 0.2
+  obstaclePrefab: {fileID: 8617065076710847314, guid: b7f0ff577dd266f4c9dfae45a9ad0c82, type: 3}
+  obstacleLength: 2
+  obstacleLifetime: 5
+  obstacleStopDuration: 1
+  pathState:
+    currentLane: {fileID: 0}
+    currentS: 0
+  isCPU: 0
+  aiDecisionInterval: 0.1
+  aiLaneShiftChance: 0.08
+  aiTurnBias: 0.5
+  aiAvoidLookahead: 4
+  aiPlaceObstacleChance: 0.06
+  aiPlaceCooldown: 3
+  laneShiftCooldown: 1
+  signReceiver: {fileID: 5374435262958340588}
 --- !u!1 &4732311367830718445
 GameObject:
   m_ObjectHideFlags: 0
@@ -311,7 +386,6 @@ GameObject:
   - component: {fileID: 6820380563972291841}
   - component: {fileID: 676174265833936519}
   - component: {fileID: 7051376330051100582}
-  - component: {fileID: 699570933971841361}
   m_Layer: 0
   m_Name: Body
   m_TagString: Untagged
@@ -391,27 +465,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &699570933971841361
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4732311367830718445}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &4856133847246233018
 GameObject:
   m_ObjectHideFlags: 0
@@ -421,7 +474,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 878697168530936803}
-  - component: {fileID: 1652787951340051147}
   m_Layer: 0
   m_Name: Car
   m_TagString: Untagged
@@ -447,21 +499,6 @@ Transform:
   - {fileID: 157941425039288624}
   m_Father: {fileID: 7800676597397011019}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1652787951340051147
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4856133847246233018}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 78991e03d68dcd6418a1f38eb5a404e2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  moveSpeed: 5
-  turnDurationPer90: 0.25
-  turnDurationPer180: 0.25
 --- !u!1 &6388567599389418042
 GameObject:
   m_ObjectHideFlags: 0
@@ -473,7 +510,6 @@ GameObject:
   - component: {fileID: 157941425039288624}
   - component: {fileID: 4070205523651764124}
   - component: {fileID: 7697851854444263353}
-  - component: {fileID: 6894914046918604765}
   m_Layer: 0
   m_Name: Lear
   m_TagString: Untagged
@@ -553,24 +589,3 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &6894914046918604765
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6388567599389418042}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}

@@ -8,9 +8,9 @@ public class SpeedLimitSign : RoadSignBase
     [Tooltip("制限速度")]
     private float limitSpeed = 10.0f;
 
-    public override void Evaluate(RoadSignQueryContext _context, RoadSignDecision _decision)
+    public override void Evaluate(RoadSignQueryContext _context, RoadSignEvaluation _evaluation)
     {
-        _decision.LimitSpeed(limitSpeed);
+        _evaluation.AddEffect(new SpeedLimitEffect(limitSpeed));
     }
 }
 

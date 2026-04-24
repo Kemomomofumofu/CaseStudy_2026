@@ -29,9 +29,9 @@ public class RoadSignReceiver : MonoBehaviour
         activeSigns.Remove(_sign);
     }
 
-    public RoadSignDecision Evaluate(RoadSignQueryContext _context)
+    public RoadSignEvaluation Evaluate(RoadSignQueryContext _context)
     {
-        var decision = new RoadSignDecision();
+        var evaluation = new RoadSignEvaluation();
         // 優先度順にソート
         activeSigns.Sort((a, b) => a.Priority.CompareTo(b.Priority));
 
@@ -44,14 +44,9 @@ public class RoadSignReceiver : MonoBehaviour
                 continue;
             }
             // 標識を評価
-            sign.Evaluate(_context, decision);
-            // 進行不能と評価されたら終了
-            if(!decision.CanProceed)
-            {
-                break;
-            }
+            sign.Evaluate(_context, evaluation);
         }
 
-        return decision;
+        return evaluation;
     }
 }

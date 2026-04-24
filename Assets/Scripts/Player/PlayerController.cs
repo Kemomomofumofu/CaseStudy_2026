@@ -68,6 +68,22 @@ public class PlayerController : MonoBehaviour
 
     private float laneShiftTimer = 0.0f;
 
+    // --- 標識関連 ---
+    [Header("標識関連")]
+    [Tooltip("標識の受信コンポーネント")]
+    [SerializeField] private RoadSignReceiver signReceiver = null;
+
+    private readonly PlayerSignResolver signResolver = new(); // 標識解決用
+
+    private void Awake()
+    {
+        if(signReceiver == null)
+        {
+            signReceiver = GetComponent<RoadSignReceiver>();
+        }
+    }
+
+
     private void Start()
     {
         ResetToInitialState();
@@ -341,7 +357,10 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        float nextS = pathState.CurrentS + moveSpeed * Time.deltaTime;
+        // 標識による速度制限を考慮
+        float currentMoveSpeed = ResolveMoveSpeedBySign();
+
+        float nextS = pathState.CurrentS + currentMoveSpeed * Time.deltaTime;
 
         // 障害物チェック
         LaneObstacle hitObstacle;
@@ -358,16 +377,19 @@ public class PlayerController : MonoBehaviour
             float remain = nextS - laneLength;
             Lane nextLane = currentLane.GetNextLane(queuedTurnDirection);
 
-            // 次のレーンがない場合
-            if (nextLane == null)
+            // 次のレーンがない場合 or 標識で進行禁止の場合
+            if (nextLane == null || !CanMoveBySign())
             {
-                OnInvalidTurn();
+                // 現在のレーンの終端で止まる
+                pathState.CurrentS = Mathf.Min(pathState.CurrentS, laneLength);
                 return;
             }
 
+            // 次のレーンへ移動
             pathState.CurrentLane = nextLane;
             pathState.CurrentS = remain;
             queuedTurnDirection = TurnDirection.Straight;
+
             return;
         }
 
@@ -519,4 +541,51 @@ public class PlayerController : MonoBehaviour
         isCPU = cpu;
         aiDecisionTimer = 0f;
     }
+
+    #region --- 標識関連 ---
+    /// <summary>
+    /// 標識の評価を行う
+    /// </summary>
+    /// <param name="_intendedDirection">意図する進行方向</param>
+    /// <returns></returns>
+    private RoadSignEvaluation EvaluateSigns(TurnDirection _intendedDirection)
+    {
+        var context = new RoadSignQueryContext
+        {
+            Actor = this.gameObject,
+            WorldPosition = transform.position,
+            IntendedDirection = _intendedDirection,
+            CurrentSpeed = moveSpeed
+        };
+
+        return signReceiver.Evaluate(context);
+    }
+
+    /// <summary>
+    /// 標識の評価結果から移動速度を決定する
+    /// </summary>
+    private float ResolveMoveSpeedBySign()
+    {
+        if(signReceiver == null)
+        {
+            return moveSpeed;
+        }
+
+        RoadSignEvaluation evaluation = EvaluateSigns(queuedTurnDirection);
+        return signResolver.ResolveMaxSpeed(evaluation, moveSpeed);
+    }
+
+    /// <summary>
+    /// 標識の評価結果から移動方向に進行可能かを決定する
+    /// </summary>
+    private bool CanMoveBySign()
+    {
+        if (signReceiver == null)
+        {
+            return true;
+        }
+        RoadSignEvaluation evaluation = EvaluateSigns(queuedTurnDirection);
+        return signResolver.CanMove(evaluation, queuedTurnDirection);
+    }
+    #endregion --- 標識関連 ---
 }
