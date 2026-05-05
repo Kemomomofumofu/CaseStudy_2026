@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -14,6 +15,14 @@ public class WayGeneratorWindow : EditorWindow
     private GameObject wayPrefab;
     private GameObject lanePrefab;
     private int laneCount = 2;
+    // ステージ一括生成用
+    private Transform stageParent;
+    private bool connectConsecutive = true;
+    private bool closeLoop = false;
+    // 接続リスト入力 (例: "A->B", "A<->B", 複数はカンマ区切り: "A->B,C")
+    private string connectionsText = "";
+    // ルート一括生成用
+    private List<Intersection> route = new List<Intersection>();
 
     private struct LaneLinkSeed
     {
@@ -89,6 +98,23 @@ public class WayGeneratorWindow : EditorWindow
 
         EditorGUILayout.Space();
 
+        // ステージ一括生成用設定
+        stageParent = (Transform)EditorGUILayout.ObjectField(
+            "Stage Parent",
+            stageParent,
+            typeof(Transform),
+            true
+        );
+
+        connectConsecutive = EditorGUILayout.Toggle("Connect Consecutive", connectConsecutive);
+        closeLoop = EditorGUILayout.Toggle("Close Loop", closeLoop);
+
+        EditorGUILayout.Space();
+        GUILayout.Label("Connections (one per line). Format: From->To or From<->To. Multiple targets: From->A,B", EditorStyles.wordWrappedLabel);
+        connectionsText = EditorGUILayout.TextArea(connectionsText, GUILayout.Height(80f));
+
+        EditorGUILayout.Space();
+
         // 入力が有効ならボタン有効
         GUI.enabled = intersectionA != null && intersectionB != null && intersectionA != intersectionB;
 
@@ -98,6 +124,48 @@ public class WayGeneratorWindow : EditorWindow
             CreateTwoWayWays(intersectionA, intersectionB, waysParent, wayPrefab, lanePrefab, laneCount);
         }
 
+        // ステージ一括生成ボタン
+        GUI.enabled = stageParent != null && connectConsecutive;
+        if (GUILayout.Button("Stage Parent から一括生成 (隣接接続)"))
+        {
+            CreateStageFromParent(stageParent, waysParent, wayPrefab, lanePrefab, laneCount, connectConsecutive, closeLoop);
+        }
+        GUI.enabled = true;
+
+        // Connections テキストからの生成
+        GUI.enabled = stageParent != null && !string.IsNullOrEmpty(connectionsText.Trim());
+        if (GUILayout.Button("Connections から一括生成"))
+        {
+            CreateFromConnections(stageParent, waysParent, wayPrefab, lanePrefab, laneCount, connectionsText);
+        }
+        GUI.enabled = true;
+
+        EditorGUILayout.Space();
+        GUILayout.Label("ルート生成", EditorStyles.boldLabel);
+
+        int count = Mathf.Max(2, EditorGUILayout.IntField("ポイント数", route.Count));
+        while (route.Count < count) route.Add(null);
+        while (route.Count > count) route.RemoveAt(route.Count - 1);
+
+        for (int i = 0; i < route.Count; ++i)
+        {
+            route[i] = (Intersection)EditorGUILayout.ObjectField(
+                $"Point {i}",
+                route[i],
+                typeof(Intersection),
+                true
+            );
+        }
+
+        GUI.enabled = route.Count >= 2 && route.All(r => r != null);
+        if (GUILayout.Button("ルートを一括生成"))
+        {
+            for (int i = 0; i < route.Count - 1; ++i)
+            {
+                CreateTwoWayWays(route[i], route[i + 1], waysParent, wayPrefab, lanePrefab, laneCount);
+            }
+            Debug.Log($"ルート生成完了: points={route.Count}");
+        }
         GUI.enabled = true;
     }
 
@@ -130,6 +198,202 @@ public class WayGeneratorWindow : EditorWindow
 
         // 変更を保存
         AssetDatabase.SaveAssets();
+    }
+
+    /// <summary>
+    /// 指定した親配下の直下子に存在する Intersection を順に読み取り、隣接する交差点間で Way を一括生成する
+    /// </summary>
+    private static void CreateStageFromParent(
+        Transform _stageParent,
+        Transform _waysParent,
+        GameObject _wayPrefab,
+        GameObject _lanePrefab,
+        int _laneCount,
+        bool _connectConsecutive,
+        bool _closeLoop
+    )
+    {
+        if (_stageParent == null)
+        {
+            Debug.LogWarning("Stage Parent が指定されていません。");
+            return;
+        }
+
+        // 直下の Intersection を順に取得
+        List<Intersection> intersections = new();
+        for (int i = 0; i < _stageParent.childCount; ++i)
+        {
+            Transform child = _stageParent.GetChild(i);
+            if (child == null) continue;
+            Intersection inter = child.GetComponent<Intersection>();
+            if (inter != null)
+            {
+                intersections.Add(inter);
+            }
+        }
+
+        // 子順(Hierarchy)は必ずしも安定したルート順ではないため、名前順でソートして安定化する
+        intersections.Sort((a, b) => a.name.CompareTo(b.name));
+
+        if (intersections.Count < 2)
+        {
+            Debug.LogWarning("Stage Parent 配下に 2 つ以上の Intersection が必要です。");
+            return;
+        }
+
+        int count = Mathf.Max(1, _laneCount);
+
+        // 隣接接続
+        if (_connectConsecutive)
+        {
+            for (int i = 0; i < intersections.Count - 1; ++i)
+            {
+                Intersection a = intersections[i];
+                Intersection b = intersections[i + 1];
+                // CreateTwoWayWays を使って双方向を安全に生成する（内部で incoming links 再構築を行う）
+                CreateTwoWayWays(a, b, _waysParent, _wayPrefab, _lanePrefab, count);
+            }
+
+            // ループで最後と最初を繋ぐ
+            if (_closeLoop && intersections.Count >= 2)
+            {
+                Intersection first = intersections[0];
+                Intersection last = intersections[intersections.Count - 1];
+                CreateTwoWayWays(last, first, _waysParent, _wayPrefab, _lanePrefab, count);
+            }
+        }
+
+        // すべての交差点の incoming link を再構築
+        for (int i = 0; i < intersections.Count; ++i)
+        {
+            RebuildIncomingLaneLinksAtIntersection(intersections[i]);
+        }
+
+        AssetDatabase.SaveAssets();
+        Debug.Log($"Stage 一括生成が完了しました: intersections={intersections.Count}");
+    }
+
+    /// <summary>
+    /// Connections テキストを解析して Way を生成する
+    /// サポート形式:
+    ///   From->To
+    ///   From<->To  (双方向)
+    ///   From->A,B,C (カンマで複数)
+    /// コメント行は # で始める
+    /// </summary>
+    private static void CreateFromConnections(
+        Transform _stageParent,
+        Transform _waysParent,
+        GameObject _wayPrefab,
+        GameObject _lanePrefab,
+        int _laneCount,
+        string _connectionsText
+    )
+    {
+        if (_stageParent == null)
+        {
+            Debug.LogWarning("Stage Parent が指定されていません。");
+            return;
+        }
+
+        // 子から Intersection を収集 (名前で検索できるよう辞書化)
+        var dict = new Dictionary<string, Intersection>();
+        for (int i = 0; i < _stageParent.childCount; ++i)
+        {
+            Transform child = _stageParent.GetChild(i);
+            if (child == null) continue;
+            Intersection inter = child.GetComponent<Intersection>();
+            if (inter != null)
+            {
+                dict[child.name] = inter;
+            }
+        }
+
+        if (dict.Count == 0)
+        {
+            Debug.LogWarning("Stage Parent 配下に Intersection が見つかりませんでした。");
+            return;
+        }
+
+        int laneCount = Mathf.Max(1, _laneCount);
+
+        // 片方向で作成したものがある場合、最終的に再構築を行うために集める
+        var touchedIntersections = new HashSet<Intersection>();
+
+        string[] lines = _connectionsText.Split(new[] { '\n', '\r' }, System.StringSplitOptions.RemoveEmptyEntries);
+        foreach (string raw in lines)
+        {
+            string line = raw.Trim();
+            if (string.IsNullOrEmpty(line) || line.StartsWith("#"))
+                continue;
+
+            bool bidir = false;
+            string[] parts = null;
+
+            if (line.Contains("<->"))
+            {
+                bidir = true;
+                parts = line.Split(new[] { "<->" }, System.StringSplitOptions.RemoveEmptyEntries);
+            }
+            else if (line.Contains("->"))
+            {
+                parts = line.Split(new[] { "->" }, System.StringSplitOptions.RemoveEmptyEntries);
+            }
+            else
+            {
+                Debug.LogWarning($"無効な形式の行をスキップします: {line}");
+                continue;
+            }
+
+            if (parts == null || parts.Length < 2)
+            {
+                Debug.LogWarning($"無効な接続指定をスキップします: {line}");
+                continue;
+            }
+
+            string fromName = parts[0].Trim();
+            string toPart = parts[1].Trim();
+            // 宛先はカンマ区切りで複数指定可能
+            string[] toNames = toPart.Split(new[] { ',' }, System.StringSplitOptions.RemoveEmptyEntries);
+
+            if (!dict.TryGetValue(fromName, out Intersection fromInter))
+            {
+                Debug.LogWarning($"From Intersection が見つかりません: {fromName}");
+                continue;
+            }
+
+            foreach (string toRaw in toNames)
+            {
+                string toName = toRaw.Trim();
+                if (!dict.TryGetValue(toName, out Intersection toInter))
+                {
+                    Debug.LogWarning($"To Intersection が見つかりません: {toName}");
+                    continue;
+                }
+
+                if (bidir)
+                {
+                    // 双方向は既存の安全なAPIを使用
+                    CreateTwoWayWays(fromInter, toInter, _waysParent, _wayPrefab, _lanePrefab, laneCount);
+                }
+                else
+                {
+                    // 片方向は作成して、後でまとめて incoming link を再構築する
+                    CreateWayObject(fromInter, toInter, _waysParent, _wayPrefab, _lanePrefab, laneCount);
+                    touchedIntersections.Add(fromInter);
+                    touchedIntersections.Add(toInter);
+                }
+            }
+        }
+
+        // 片方向作成分の再構築
+        foreach (var inter in touchedIntersections)
+        {
+            RebuildIncomingLaneLinksAtIntersection(inter);
+        }
+
+        AssetDatabase.SaveAssets();
+        Debug.Log("Connections からの生成が完了しました。");
     }
 
     private static GeneratedWayInfo CreateWayObject(
