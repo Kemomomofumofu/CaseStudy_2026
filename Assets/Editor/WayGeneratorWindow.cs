@@ -36,6 +36,8 @@ public class WayGeneratorWindow : EditorWindow
     private const string RoadRegistryAssetPath = "Assets/Editor/RoadAssetRegistry.asset";
     private string newRegistryTag = "";
     private string tagFilter = "All";
+    // Editor window scroll position
+    private Vector2 scrollPos = Vector2.zero;
 
     private struct LaneLinkSeed
     {
@@ -122,6 +124,9 @@ public class WayGeneratorWindow : EditorWindow
 
     private void OnGUI()
     {
+        // Begin scrollable area
+        scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+
         GUILayout.Label("交差点から双方向のWayを生成", EditorStyles.boldLabel);
 
         EditorGUILayout.Space();
@@ -317,6 +322,64 @@ public class WayGeneratorWindow : EditorWindow
         EditorGUILayout.Space();
         GUILayout.Label("ルート生成", EditorStyles.boldLabel);
 
+        // ルート生成用の道路アセット設定（ここで登録できるようにする）
+        EditorGUILayout.LabelField("Route Road Asset", EditorStyles.miniBoldLabel);
+        roadPrefab = (GameObject)EditorGUILayout.ObjectField(
+            "Road Prefab (for route)",
+            roadPrefab,
+            typeof(GameObject),
+            false
+        );
+        roadPrefabBaseLength = EditorGUILayout.FloatField("Road Prefab Base Length (for route)", roadPrefabBaseLength);
+        attachRoadPrefab = EditorGUILayout.Toggle("Attach Road Prefab (route)", attachRoadPrefab);
+
+        EditorGUILayout.BeginHorizontal();
+        newRegistryTag = EditorGUILayout.TextField("Registry Tag", newRegistryTag);
+        if (GUILayout.Button("Add Road Prefab to Registry", GUILayout.Width(200)))
+        {
+            if (roadPrefab != null)
+            {
+                if (roadRegistry == null) LoadOrCreateRoadRegistry(true);
+                if (!roadRegistry.entries.Any(x => x.prefab == roadPrefab))
+                {
+                    roadRegistry.entries.Add(new RoadAssetEntry { prefab = roadPrefab, tag = newRegistryTag });
+                    SaveRoadRegistry();
+                    Debug.Log($"Added {roadPrefab.name} to Road Registry with tag '{newRegistryTag}'");
+                }
+                else
+                {
+                    Debug.LogWarning("This prefab is already registered.");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("Select a Road Prefab (for route) before adding to registry.");
+            }
+        }
+        if (GUILayout.Button("Add Selected to Registry", GUILayout.Width(180)))
+        {
+            var sel = Selection.activeObject as GameObject;
+            if (sel != null)
+            {
+                if (roadRegistry == null) LoadOrCreateRoadRegistry(true);
+                if (!roadRegistry.entries.Any(x => x.prefab == sel))
+                {
+                    roadRegistry.entries.Add(new RoadAssetEntry { prefab = sel, tag = newRegistryTag });
+                    SaveRoadRegistry();
+                    Debug.Log($"Added {sel.name} to Road Registry with tag '{newRegistryTag}'");
+                }
+                else
+                {
+                    Debug.LogWarning("Selected prefab is already registered.");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("Select a prefab in Project window before using Add Selected to Registry.");
+            }
+        }
+        EditorGUILayout.EndHorizontal();
+
         // Sceneクリックモード
         sceneClickMode = EditorGUILayout.Toggle("Scene Click Mode (add points)", sceneClickMode);
         EditorGUILayout.HelpBox("SceneViewで左クリックすると Intersection を順にルートに追加します。", MessageType.Info);
@@ -345,6 +408,9 @@ public class WayGeneratorWindow : EditorWindow
             Debug.Log($"ルート生成完了: points={route.Count}");
         }
         GUI.enabled = true;
+
+        // End scrollable area
+        EditorGUILayout.EndScrollView();
     }
 
     private void OnEnable()
