@@ -13,6 +13,86 @@ public class Intersection : MonoBehaviour
     [Tooltip("北の道路")]
     [SerializeField] private Way NorthWay;
 
+    [Header("Intersection Asset")]
+    [Tooltip("Intersection に配置する道路プレハブ（任意）")]
+    [SerializeField] private GameObject intersectionPrefab;
+
+    // 既存の単一プレハブ保持は互換性のため残す
+    public GameObject IntersectionPrefab => intersectionPrefab;
+
+    // 複数の分岐タイプに対するプレハブ登録（十字路/T字路/直線/コーナー/行き止まり 等）
+    public enum IntersectionShape
+    {
+        Unknown = 0,
+        DeadEnd = 1,
+        Straight = 2,
+        Corner = 3,
+        ThreeWay = 4,
+        Cross = 5
+    }
+
+    [System.Serializable]
+    public class IntersectionAssetMapping
+    {
+        public IntersectionShape shape;
+        public GameObject prefab;
+    }
+
+    [Tooltip("形状ごとの Intersection アセットを登録します。未登録の場合は上の Default を使用します。")]
+    [SerializeField] private List<IntersectionAssetMapping> intersectionPrefabs = new();
+
+    /// <summary>
+    /// 現在の割り当てられた方角(Way)状況から交差点の形状を推定し、対応プレハブを返します。
+    /// マッピングに該当がなければ従来の単一の IntersectionPrefab を返します。
+    /// </summary>
+    public GameObject GetPreferredIntersectionPrefab()
+    {
+        bool north = NorthWay != null;
+        bool east = EastWay != null;
+        bool south = SouthWay != null;
+        bool west = WestWay != null;
+
+        int used = (north ? 1 : 0) + (east ? 1 : 0) + (south ? 1 : 0) + (west ? 1 : 0);
+
+        IntersectionShape shape;
+        if (used >= 4)
+        {
+            shape = IntersectionShape.Cross;
+        }
+        else if (used == 3)
+        {
+            shape = IntersectionShape.ThreeWay;
+        }
+        else if (used == 2)
+        {
+            // 反対方向同士なら直線、そうでなければコーナー
+            if ((north && south) || (east && west))
+                shape = IntersectionShape.Straight;
+            else
+                shape = IntersectionShape.Corner;
+        }
+        else if (used == 1)
+        {
+            shape = IntersectionShape.DeadEnd;
+        }
+        else
+        {
+            shape = IntersectionShape.Unknown;
+        }
+
+        if (intersectionPrefabs != null)
+        {
+            foreach (var m in intersectionPrefabs)
+            {
+                if (m != null && m.shape == shape && m.prefab != null)
+                    return m.prefab;
+            }
+        }
+
+        // フォールバック
+        return intersectionPrefab;
+    }
+
     [Header("流入道路（自動設定）")]
     [SerializeField] private List<Way> incomingWays = new();
     public IReadOnlyList<Way> IncomingWays => incomingWays;
