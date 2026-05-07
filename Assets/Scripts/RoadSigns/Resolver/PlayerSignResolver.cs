@@ -1,8 +1,4 @@
-﻿
-
-using Unity.VisualScripting;
-
-public sealed class PlayerSignResolver
+﻿public sealed class PlayerSignResolver
 {
     public bool CanMove(RoadSignEvaluation _evaluation, TurnDirection _direction)
     {
@@ -15,6 +11,21 @@ public sealed class PlayerSignResolver
         }
 
         return true;
+    }
+
+    public bool TryResolveForcedDirection(RoadSignEvaluation _evaluation, out TurnDirection _direction)
+    {
+        foreach (var effect in _evaluation.Effects)
+        {
+            if (effect is ForceDirectionEffect force)
+            {
+                _direction = force.Direction;
+                return true;
+            }
+        }
+
+        _direction = TurnDirection.Straight;
+        return false;
     }
 
     public float ResolveMaxSpeed(RoadSignEvaluation _evaluation, float _defaultSpeed)

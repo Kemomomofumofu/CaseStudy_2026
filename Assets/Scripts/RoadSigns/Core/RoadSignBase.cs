@@ -1,21 +1,18 @@
 using UnityEngine;
-using UnityEngine.Timeline;
 
 /// <summary>
 /// 標識の基底クラス
-/// 新たに標識を追加する際はBaseクラスを継承して作成してください
 /// </summary>
 public abstract class RoadSignBase : MonoBehaviour
 {
-    [Header("共通設定")]
-    [SerializeField] private int priority = 0; // 標識の優先度(0が最も高い)
-                                               // todo: 影響範囲の設定方法は要検討
-    [SerializeField] private Collider influenceTrigger = null; // 標識の影響範囲
+    [Header("基本設定")]
+    [SerializeField] private int priority = 0;
+    [SerializeField] private Collider influenceTrigger = null;
 
     public int Priority => priority;
 
     /// <summary>
-    /// 初期化処理
+    /// 初期化
     /// </summary>
     protected virtual void Reset()
     {
@@ -27,7 +24,7 @@ public abstract class RoadSignBase : MonoBehaviour
     }
 
     /// <summary>
-    /// 標識の影響範囲に入った際の処理
+    /// 標識の影響範囲に入った場合の処理
     /// </summary>
     /// <param name="_other">影響範囲に入ったオブジェクトのコライダー</param>
     protected virtual void OnTriggerEnter(Collider _other)
@@ -36,7 +33,6 @@ public abstract class RoadSignBase : MonoBehaviour
         {
             receiver.AddSign(this);
         }
-
     }
 
     protected virtual void OnTriggerExit(Collider _other)
@@ -48,19 +44,15 @@ public abstract class RoadSignBase : MonoBehaviour
     }
 
     /// <summary>
-    /// この標識が今回の状況に関連するかを判定する
+    /// この標識が現在の状況に関連するかを判定する
     /// </summary>
-    /// <param name="_context"></param>
-    /// <returns></returns>
     public virtual bool IsRelevant(RoadSignQueryContext _context)
     {
         return true;
     }
 
     /// <summary>
-    /// 派生した標識側でオーバーライドしてルールを実装してください
+    /// 標識の効果を評価する
     /// </summary>
-    /// <param name="_context"></param>
-    /// <param name="_evaluation"></param>
     public abstract void Evaluate(RoadSignQueryContext _context, RoadSignEvaluation _evaluation);
 }

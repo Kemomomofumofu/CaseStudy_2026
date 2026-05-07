@@ -22,6 +22,10 @@ public class PlayerController : MonoBehaviour
     [Tooltip("判定")]
     [SerializeField] private float obstacleCheckMargin = 0.2f;
 
+    [Header("交差点設定")]
+    [Tooltip("交差点で進行方向を決める距離（Lane終端からの距離）")]
+    [SerializeField] private float intersectionDecisionDistance = 0.6f;
+
     [Header("障害物設定")]
     [Tooltip("生成する障害物Prefab")]
     [SerializeField] private LaneObstacle obstaclePrefab;
@@ -106,6 +110,7 @@ public class PlayerController : MonoBehaviour
         }
 
         UpdateInput();
+        UpdateQueuedTurnDirectionBySign();
         UpdateMovement();
         SyncTransformToLane();
     }
@@ -165,24 +170,6 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // 交差点での進行方向予約
-        if (keyboard.wKey.wasPressedThisFrame)
-        {
-            queuedTurnDirection = TurnDirection.Straight;
-        }
-        else if (keyboard.aKey.wasPressedThisFrame)
-        {
-            queuedTurnDirection = TurnDirection.Left;
-        }
-        else if (keyboard.dKey.wasPressedThisFrame)
-        {
-            queuedTurnDirection = TurnDirection.Right;
-        }
-        else if (keyboard.sKey.wasPressedThisFrame)
-        {
-            queuedTurnDirection = TurnDirection.Back;
-        }
-
         // レーン変更
         if (keyboard.leftArrowKey.wasPressedThisFrame)
         {
@@ -198,6 +185,50 @@ public class PlayerController : MonoBehaviour
         {
             TrySpawnObstacleAtLaneEnd();
         }
+    }
+
+    /// <summary>
+    /// 交差点手前で標識を参照して進行方向を予約
+    /// </summary>
+    private void UpdateQueuedTurnDirectionBySign()
+    {
+        Lane currentLane = pathState.CurrentLane;
+        if (currentLane == null)
+        {
+            return;
+        }
+
+        float laneLength = currentLane.Length;
+        if (laneLength <= 0f)
+        {
+            return;
+        }
+
+        if (pathState.CurrentS < laneLength - intersectionDecisionDistance)
+        {
+            return;
+        }
+
+        queuedTurnDirection = ResolveTurnDirectionBySign();
+    }
+
+    /// <summary>
+    /// 標識の評価結果から進行方向を決定する
+    /// </summary>
+    private TurnDirection ResolveTurnDirectionBySign()
+    {
+        if (signReceiver == null)
+        {
+            return TurnDirection.Straight;
+        }
+
+        RoadSignEvaluation evaluation = EvaluateSigns(TurnDirection.Straight);
+        if (signResolver.TryResolveForcedDirection(evaluation, out TurnDirection forcedDirection))
+        {
+            return forcedDirection;
+        }
+
+        return TurnDirection.Straight;
     }
 
     /// <summary>
@@ -259,40 +290,6 @@ public class PlayerController : MonoBehaviour
                 return;
             }
             // どちらも回避できない場合はそのまま（衝突処理は移動処理側で行う）
-        }
-
-        // --- 交差点での進行方向予約（既存挙動） ---
-        float laneLength = currentLane.Length;
-        if (laneLength > 0f && pathState.CurrentS >= laneLength - 0.6f)
-        {
-            var options = new System.Collections.Generic.List<TurnDirection>();
-            if (currentLane.GetNextLane(TurnDirection.Straight) != null) options.Add(TurnDirection.Straight);
-            if (currentLane.GetNextLane(TurnDirection.Left) != null) options.Add(TurnDirection.Left);
-            if (currentLane.GetNextLane(TurnDirection.Right) != null) options.Add(TurnDirection.Right);
-            if (options.Count == 0)
-            {
-                queuedTurnDirection = TurnDirection.Straight;
-            }
-            else
-            {
-                float r = UnityEngine.Random.value;
-                if (options.Contains(TurnDirection.Straight) && r < aiTurnBias)
-                {
-                    queuedTurnDirection = TurnDirection.Straight;
-                }
-                else
-                {
-                    var sideOptions = options.FindAll(t => t == TurnDirection.Left || t == TurnDirection.Right);
-                    if (sideOptions.Count > 0)
-                    {
-                        queuedTurnDirection = sideOptions[UnityEngine.Random.Range(0, sideOptions.Count)];
-                    }
-                    else
-                    {
-                        queuedTurnDirection = TurnDirection.Straight;
-                    }
-                }
-            }
         }
 
         // --- 時々レーン変更（雑な確率） ---
@@ -378,7 +375,7 @@ public class PlayerController : MonoBehaviour
             Lane nextLane = currentLane.GetNextLane(queuedTurnDirection);
 
             // 次のレーンがない場合 or 標識で進行禁止の場合
-            if (nextLane == null || !CanMoveBySign())
+            if (nextLane == null || !CanMoveBySign(queuedTurnDirection))
             {
                 // 現在のレーンの終端で止まる
                 pathState.CurrentS = Mathf.Min(pathState.CurrentS, laneLength);
@@ -578,14 +575,14 @@ public class PlayerController : MonoBehaviour
     /// <summary>
     /// 標識の評価結果から移動方向に進行可能かを決定する
     /// </summary>
-    private bool CanMoveBySign()
+    private bool CanMoveBySign(TurnDirection _direction)
     {
         if (signReceiver == null)
         {
             return true;
         }
-        RoadSignEvaluation evaluation = EvaluateSigns(queuedTurnDirection);
-        return signResolver.CanMove(evaluation, queuedTurnDirection);
+        RoadSignEvaluation evaluation = EvaluateSigns(_direction);
+        return signResolver.CanMove(evaluation, _direction);
     }
     #endregion --- 標識関連 ---
 }

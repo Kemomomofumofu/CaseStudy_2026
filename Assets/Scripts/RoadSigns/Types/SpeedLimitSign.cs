@@ -1,10 +1,8 @@
-﻿using System.Collections;
-using UnityEngine;
-
+﻿using UnityEngine;
 
 public class SpeedLimitSign : RoadSignBase
 {
-    [SerializeField] 
+    [SerializeField]
     [Tooltip("制限速度")]
     private float limitSpeed = 10.0f;
 
