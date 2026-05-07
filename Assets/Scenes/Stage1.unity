@@ -561,7 +561,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 878697168530936803, guid: 976fc22f62e79514cba1d47f1af723f1, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -10.52
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1652787951340051147, guid: 976fc22f62e79514cba1d47f1af723f1, type: 3}
       propertyPath: isCPU
@@ -599,6 +599,10 @@ PrefabInstance:
       propertyPath: pathState.currentLane
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 2196450369251709988, guid: 976fc22f62e79514cba1d47f1af723f1, type: 3}
+      propertyPath: initialLane
+      value: 
+      objectReference: {fileID: 1703292008}
     - target: {fileID: 4489111264671963074, guid: 976fc22f62e79514cba1d47f1af723f1, type: 3}
       propertyPath: m_Name
       value: PlayerRoot
@@ -1742,6 +1746,7 @@ MonoBehaviour:
   moveSpeed: 10
   rotateSpeed: 8
   obstacleCheckMargin: 0.2
+  intersectionDecisionDistance: 0.6
   obstaclePrefab: {fileID: 8617065076710847314, guid: b7f0ff577dd266f4c9dfae45a9ad0c82, type: 3}
   obstacleLength: 0
   obstacleLifetime: 0
@@ -1757,6 +1762,7 @@ MonoBehaviour:
   aiPlaceObstacleChance: 0.06
   aiPlaceCooldown: 3
   laneShiftCooldown: 1
+  signReceiver: {fileID: 0}
 --- !u!4 &499458247
 Transform:
   m_ObjectHideFlags: 0
