@@ -31,7 +31,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float obstacleLifetime = 5.0f;
     [Tooltip("障害物に衝突した際の停止時間")]
     [SerializeField] private float obstacleStopDuration = 1.0f;
-    private bool isStopping = false; // 停止中か
+    public bool isStopping = false; // 停止中か
     private float stopTimer = 0.0f; // 停止時間のタイマー
 
     [Tooltip("状態")]
@@ -60,7 +60,7 @@ public class PlayerController : MonoBehaviour
     private float aiDecisionTimer = 0.0f;
     private float aiPlaceTimer = 0.0f;
 
-    private TurnDirection queuedTurnDirection = TurnDirection.Straight;
+    public TurnDirection queuedTurnDirection = TurnDirection.Straight;
     public TurnDirection QueuedTurnDirection => queuedTurnDirection;
 
     [Tooltip("車線変更のクールタイム（秒）")]
@@ -432,6 +432,8 @@ public class PlayerController : MonoBehaviour
 
         pathState.CurrentS = Mathf.Max(0.0f, pathState.CurrentS - 1.0f); // ぶつかり続けないように少し後退
         SyncTransformToLane();
+
+
 
         Debug.Log("障害物に衝突");
     }
