@@ -5,28 +5,41 @@ using UnityEngine;
 /// </summary>
 public class GoalTrigger : MonoBehaviour
 {
+    // 勝敗確定済みか
     private bool isFinished = false;
 
+    /// <summary>
+    /// Triggerに入った瞬間
+    /// </summary>
+    /// <param name="other">接触した相手</param>
     private void OnTriggerEnter(Collider other)
     {
-        // 既に勝敗が決まっているなら無視
+        // 既に勝敗が決まっているなら処理しない
         if (isFinished)
         {
             return;
         }
 
-        // Player(Car) が先に到着
-        if (other.gameObject.name == "PlayerBody")
+        // 接触確認
+        Debug.Log("接触した : " + other.gameObject.name);
+
+        // Tag確認
+        Debug.Log("Tag : " + other.gameObject.tag);
+
+        // Player が先にゴール
+        if (other.CompareTag("Player"))
         {
             isFinished = true;
-            Debug.Log("クリア");
+
+            Debug.Log("===== CLEAR =====");
         }
 
-        // Enemy が先に到着
-        else if (other.gameObject.name == "EnemyBody")
+        // Enemy が先にゴール
+        else if (other.CompareTag("Enemy"))
         {
             isFinished = true;
-            Debug.Log("ゲームオーバー");
+
+            Debug.Log("===== GAME OVER =====");
         }
     }
 }
