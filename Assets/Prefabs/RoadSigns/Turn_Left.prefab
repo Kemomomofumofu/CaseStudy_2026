@@ -249,7 +249,7 @@ GameObject:
   - component: {fileID: 7670311938632429950}
   - component: {fileID: 8865773990383606112}
   m_Layer: 0
-  m_Name: ForceDirectionSign_Left
+  m_Name: Turn_Left
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

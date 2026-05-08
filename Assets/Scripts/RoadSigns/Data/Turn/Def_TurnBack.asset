@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cb6cb86864199504fb26f2bd70539949, type: 3}
-  m_Name: Def_SpeedLimit
+  m_Name: Def_TurnBack
   m_EditorClassIdentifier: Assembly-CSharp::RoadSignDefinition
-  displayName: SpeedLimit
-  icon: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  signPrefab: {fileID: 4137751196765133200, guid: 1a995d8a8644f5e41bc9df786bb4f531, type: 3}
-  overrideDirection: 0
-  directionOverride: 0
+  displayName: Back
+  icon: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  signPrefab: {fileID: 8865773990383606112, guid: c92f43b83d943e6419802e22c7c7459d, type: 3}
+  overrideDirection: 1
+  directionOverride: 3

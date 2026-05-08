@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cb6cb86864199504fb26f2bd70539949, type: 3}
-  m_Name: Def_TurnRight
+  m_Name: Def_TurnLeft
   m_EditorClassIdentifier: Assembly-CSharp::RoadSignDefinition
-  displayName: "\u53F3\u6298"
-  icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  signPrefab: {fileID: 8865773990383606112, guid: e397538ea9fd6424b94f7e7db5c2837a, type: 3}
+  displayName: Left
+  icon: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  signPrefab: {fileID: 8865773990383606112, guid: 03ade73d1f1a6f247ae60ba414f08717, type: 3}
   overrideDirection: 1
-  directionOverride: 2
+  directionOverride: 1

@@ -1964,10 +1964,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadSignHandController
   entries:
+  - definition: {fileID: 11400000, guid: 28812e06f8cc33548a6199b3b5ec57cc, type: 2}
+    count: 99
+  - definition: {fileID: 11400000, guid: 84b752a4935fdc34caba670696151572, type: 2}
+    count: 99
+  - definition: {fileID: 11400000, guid: 24d7d0153f793474c8610d41be124b1e, type: 2}
+    count: 99
   - definition: {fileID: 11400000, guid: 91360d6653183994ca85360ab7d7124f, type: 2}
-    count: 2
-  - definition: {fileID: 11400000, guid: f92c1d93e4308344b91b4e366276110e, type: 2}
-    count: 1
+    count: 99
   selectedIndex: 0
 --- !u!4 &274213265
 Transform:
@@ -13127,7 +13131,6 @@ MonoBehaviour:
     m_Bits: 4294967295
   placementYOffset: 0
   handController: {fileID: 274213264}
-  selectedDefinition: {fileID: 0}
 --- !u!4 &1955825037
 Transform:
   m_ObjectHideFlags: 0

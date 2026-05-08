@@ -54,6 +54,36 @@ public sealed class RoadSignHandController : MonoBehaviour
     }
 
     /// <summary>
+    /// 選択中の標識を一枚消費する。定義も一緒に返す
+    /// </summary>
+    /// <returns></returns>
+    public bool TryConsumeSelected(out RoadSignDefinition _definition, out RoadSignBase _signPrefab, out bool _overrideDirection, out TurnDirection _direction)
+    {
+        _definition = null;
+        _signPrefab = null;
+        _overrideDirection = false;
+        _direction = TurnDirection.Straight;
+
+        if (!TryGetSelected(out RoadSignHandEntry entry))
+        {
+            return false;
+        }
+
+        if (!entry.TryConsume())
+        {
+            return false;
+        }
+
+        _definition = entry.Definition;
+        _signPrefab = entry.SignPrefab;
+        _overrideDirection = entry.OverrideDirection;
+        _direction = entry.DirectionOverride;
+
+        Changed?.Invoke();
+        return true;
+    }
+
+    /// <summary>
     /// 選択中のエントリを取得する
     /// </summary>
     public bool TryGetSelected(out RoadSignHandEntry _entry)

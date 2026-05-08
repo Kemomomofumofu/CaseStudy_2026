@@ -32,6 +32,16 @@ public class RoadSignReceiver : MonoBehaviour
     public RoadSignEvaluation Evaluate(RoadSignQueryContext _context)
     {
         var evaluation = new RoadSignEvaluation();
+
+        // 破棄済みの標識を除外
+        for (int i = activeSigns.Count - 1; i >= 0; i--)
+        {
+            if (activeSigns[i] == null)
+            {
+                activeSigns.RemoveAt(i);
+            }
+        }
+
         // 優先度順にソート
         activeSigns.Sort((a, b) => a.Priority.CompareTo(b.Priority));
 

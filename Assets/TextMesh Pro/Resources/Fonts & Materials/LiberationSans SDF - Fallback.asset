@@ -216,21 +216,6 @@ MonoBehaviour:
   m_AtlasPopulationMode: 1
   InternalDynamicOS: 0
   m_GlyphTable:
-  - m_Index: 66
-    m_Metrics:
-      m_Width: 51
-      m_Height: 6
-      m_HorizontalBearingX: -2
-      m_HorizontalBearingY: -12
-      m_HorizontalAdvance: 48
-    m_GlyphRect:
-      m_X: 93
-      m_Y: 10
-      m_Width: 51
-      m_Height: 6
-    m_Scale: 1
-    m_AtlasIndex: 0
-    m_ClassDefinitionType: 0
   - m_Index: 2030
     m_Metrics:
       m_Width: 64
@@ -246,7 +231,22 @@ MonoBehaviour:
     m_Scale: 1
     m_AtlasIndex: 0
     m_ClassDefinitionType: 0
-  - m_Index: 2102
+  - m_Index: 66
+    m_Metrics:
+      m_Width: 51
+      m_Height: 6
+      m_HorizontalBearingX: -2
+      m_HorizontalBearingY: -12
+      m_HorizontalAdvance: 48
+    m_GlyphRect:
+      m_X: 93
+      m_Y: 10
+      m_Width: 51
+      m_Height: 6
+    m_Scale: 1
+    m_AtlasIndex: 0
+    m_ClassDefinitionType: 0
+  - m_Index: 2104
     m_Metrics:
       m_Width: 52
       m_Height: 22
@@ -254,8 +254,8 @@ MonoBehaviour:
       m_HorizontalBearingY: 25
       m_HorizontalAdvance: 86
     m_GlyphRect:
-      m_X: 10
-      m_Y: 38
+      m_X: 163
+      m_Y: 10
       m_Width: 52
       m_Height: 22
     m_Scale: 1
@@ -276,7 +276,7 @@ MonoBehaviour:
     m_Scale: 1
     m_AtlasIndex: 0
     m_ClassDefinitionType: 0
-  - m_Index: 2104
+  - m_Index: 2102
     m_Metrics:
       m_Width: 52
       m_Height: 22
@@ -284,8 +284,8 @@ MonoBehaviour:
       m_HorizontalBearingY: 25
       m_HorizontalAdvance: 86
     m_GlyphRect:
-      m_X: 163
-      m_Y: 10
+      m_X: 10
+      m_Y: 38
       m_Width: 52
       m_Height: 22
     m_Scale: 1
@@ -308,24 +308,24 @@ MonoBehaviour:
     m_ClassDefinitionType: 0
   m_CharacterTable:
   - m_ElementType: 1
-    m_Unicode: 95
-    m_GlyphIndex: 66
-    m_Scale: 1
-  - m_ElementType: 1
     m_Unicode: 8230
     m_GlyphIndex: 2030
     m_Scale: 1
   - m_ElementType: 1
-    m_Unicode: 8592
-    m_GlyphIndex: 2102
+    m_Unicode: 95
+    m_GlyphIndex: 66
+    m_Scale: 1
+  - m_ElementType: 1
+    m_Unicode: 8594
+    m_GlyphIndex: 2104
     m_Scale: 1
   - m_ElementType: 1
     m_Unicode: 8593
     m_GlyphIndex: 2103
     m_Scale: 1
   - m_ElementType: 1
-    m_Unicode: 8594
-    m_GlyphIndex: 2104
+    m_Unicode: 8592
+    m_GlyphIndex: 2102
     m_Scale: 1
   - m_ElementType: 1
     m_Unicode: 8595

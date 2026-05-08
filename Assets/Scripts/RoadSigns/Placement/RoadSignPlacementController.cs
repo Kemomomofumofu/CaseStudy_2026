@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -12,8 +14,7 @@ public sealed class RoadSignPlacementController : MonoBehaviour
     [Header("手札管理")]
     [SerializeField] private RoadSignHandController handController = null;
 
-    [Header("手札未使用時の選択")]
-    [SerializeField] private RoadSignDefinition selectedDefinition = null;
+    private readonly Dictionary<Type, RoadSignBase> placedByType = new();
 
     /// <summary>
     /// カメラ未指定時に MainCamera を取得する
@@ -52,7 +53,7 @@ public sealed class RoadSignPlacementController : MonoBehaviour
             return;
         }
 
-        if (!TryResolveSelectedSign(out RoadSignBase signPrefab, out bool overrideDirection, out TurnDirection direction))
+        if (!TryResolveSelectedSign(out RoadSignDefinition definition, out RoadSignBase signPrefab, out bool overrideDirection, out TurnDirection direction))
         {
             return;
         }
@@ -65,39 +66,31 @@ public sealed class RoadSignPlacementController : MonoBehaviour
         {
             forceSign.SetForceDirection(direction);
         }
+
+        Type signType = signPrefab.GetType();
+        if (placedByType.TryGetValue(signType, out RoadSignBase existing) && existing != null)
+        {
+            Destroy(existing.gameObject);
+        }
+
+        placedByType[signType] = instance;
     }
 
     /// <summary>
     /// 選択中の標識を取得する
     /// </summary>
-    private bool TryResolveSelectedSign(out RoadSignBase _signPrefab, out bool _overrideDirection, out TurnDirection _direction)
+    private bool TryResolveSelectedSign(out RoadSignDefinition _definition, out RoadSignBase _signPrefab, out bool _overrideDirection, out TurnDirection _direction)
     {
+        _definition = null;
         _signPrefab = null;
         _overrideDirection = false;
         _direction = TurnDirection.Straight;
 
-        if (handController != null)
-        {
-            return handController.TryConsumeSelected(out _signPrefab, out _overrideDirection, out _direction);
-        }
-
-        if (selectedDefinition == null || selectedDefinition.SignPrefab == null)
+        if (handController == null)
         {
             return false;
         }
 
-        _signPrefab = selectedDefinition.SignPrefab;
-        _overrideDirection = selectedDefinition.OverrideDirection;
-        _direction = selectedDefinition.DirectionOverride;
-
-        return true;
-    }
-
-    /// <summary>
-    /// 手札未使用時の選択を設定する
-    /// </summary>
-    public void SetSelectedDefinition(RoadSignDefinition _definition)
-    {
-        selectedDefinition = _definition;
+        return handController.TryConsumeSelected(out _definition, out _signPrefab, out _overrideDirection, out _direction);
     }
 }

@@ -249,7 +249,7 @@ GameObject:
   - component: {fileID: 7670311938632429950}
   - component: {fileID: 8865773990383606112}
   m_Layer: 0
-  m_Name: ForceDirectionSign_Right
+  m_Name: Turn_Straight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -306,4 +306,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ForceDirectionSign
   priority: 0
   influenceTrigger: {fileID: 7670311938632429950}
-  forceDirection: 2
+  forceDirection: 0
