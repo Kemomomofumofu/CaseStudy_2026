@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// ƒS[ƒ‹”»’èŠÇ—
@@ -32,6 +33,9 @@ public class GoalTrigger : MonoBehaviour
             isFinished = true;
 
             Debug.Log("===== CLEAR =====");
+
+            // ƒV[ƒ“‘JˆÚ
+            SceneManager.LoadScene("Stage1Result");
         }
 
         // Enemy ‚ªæ‚ÉƒS[ƒ‹
@@ -40,6 +44,9 @@ public class GoalTrigger : MonoBehaviour
             isFinished = true;
 
             Debug.Log("===== GAME OVER =====");
+
+            // ƒV[ƒ“‘JˆÚ
+            SceneManager.LoadScene("Stage1Result");
         }
     }
 }
