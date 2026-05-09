@@ -11,9 +11,10 @@ GameObject:
   - component: {fileID: 6273686575019483118}
   - component: {fileID: 5229227408985624368}
   - component: {fileID: 2447126736259516466}
+  - component: {fileID: 8775425448009335846}
   m_Layer: 0
   m_Name: Front
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -90,6 +91,33 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!54 &8775425448009335846
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266402869016106017}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &4063187456420582864
 GameObject:
   m_ObjectHideFlags: 0
@@ -241,10 +269,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCamera
   target: {fileID: 878697168530936803}
+  playerController: {fileID: 0}
   followOffset: {x: 0, y: 5, z: -10}
+  followRotationOffset: {x: 0, y: 5, z: 90}
   lookAtOffset: {x: 0, y: 2, z: 0}
   positionSmoothTime: 0.2
   rotationSmoothTime: 0.1
+  defaultFov: 40
+  HighFov: 70
+  LowFov: 10
+  FovlerpSpeed: 5
+  DefaultZRot: 0
+  TargetZRot: 20
+  ZRotlerpSpeed: 5
+  ZRotlerpSpeedBack: 5
+  CameraZrotBuffer: 0
+  DefaultYRot: 0
+  TargetYRot: 20
+  YRotlerpSpeed: 5
+  YRotlerpSpeedBack: 5
+  CameraYrotBuffer: 0
+  DefaultXRot: 0
+  TargetXRot: 20
+  XRotlerpSpeed: 5
+  XRotlerpSpeedBack: 5
+  CameraXrotBuffer: 0
+  laneShiftCooldown: 1
+  currentDirection: 0
 --- !u!1 &4489111264671963074
 GameObject:
   m_ObjectHideFlags: 0
@@ -359,10 +410,12 @@ MonoBehaviour:
   moveSpeed: 10
   rotateSpeed: 8
   obstacleCheckMargin: 0.2
+  intersectionDecisionDistance: 0.6
   obstaclePrefab: {fileID: 8617065076710847314, guid: b7f0ff577dd266f4c9dfae45a9ad0c82, type: 3}
   obstacleLength: 2
   obstacleLifetime: 5
   obstacleStopDuration: 1
+  isStopping: 0
   pathState:
     currentLane: {fileID: 0}
     currentS: 0
@@ -373,6 +426,7 @@ MonoBehaviour:
   aiAvoidLookahead: 4
   aiPlaceObstacleChance: 0.06
   aiPlaceCooldown: 3
+  queuedTurnDirection: 0
   laneShiftCooldown: 1
   signReceiver: {fileID: 5374435262958340588}
 --- !u!1 &4732311367830718445
