@@ -4,6 +4,17 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
+// Flags describing allowed turn directions for a lane. The original code
+// referenced `Lane.LaneTurnFlags` which does not exist in this project.
+[System.Flags]
+public enum LaneTurnFlags
+{
+    None = 0,
+    Straight = 1 << 0,
+    Left = 1 << 1,
+    Right = 1 << 2
+}
+
 /// <summary>
 /// 二つの交差点から双方向のWayを生成し、LaneとLaneLinkまで自動設定するツール
 /// </summary>
@@ -26,11 +37,115 @@ public class WayGeneratorWindow : EditorWindow
     private const string RoadRegistryAssetPath = "Assets/Editor/RoadAssetRegistry.asset";
     private string newRegistryTag = "";
     private string tagFilter = "All";
+    // ネットワーク一括生成用アセット
+    private RoadNetworkAsset roadNetworkAsset;
 
     private struct LaneLinkSeed
     {
         public TurnDirection TurnDirection;
         public Lane NextLane;
+    }
+
+    private static GeneratedWayInfo CreateOneWay(
+        Intersection _from,
+        Intersection _to,
+        Transform _parent,
+        GameObject _wayPrefab,
+        GameObject _lanePrefab,
+        int _laneCount,
+        GameObject _roadPrefab,
+        float _roadPrefabBaseLength,
+        bool _attachRoadPrefab,
+        bool _attachIntersectionAsset,
+        LaneTurnFlags _allowedTurns
+    )
+    {
+        // Use existing creation logic
+        GeneratedWayInfo info = CreateWayObject(_from, _to, _parent, _wayPrefab, _lanePrefab, _laneCount, _roadPrefab, _roadPrefabBaseLength, _attachRoadPrefab);
+
+        // Apply allowed turn flags to each created lane
+        if (info.Lanes != null)
+        {
+            for (int i = 0; i < info.Lanes.Count; ++i)
+            {
+                Lane lane = info.Lanes[i];
+                if (lane == null) continue;
+
+                SerializedObject laneSO = new(lane);
+                var prop = laneSO.FindProperty("allowedTurns");
+                if (prop != null)
+                {
+                    prop.enumValueIndex = (int)_allowedTurns;
+                    laneSO.ApplyModifiedPropertiesWithoutUndo();
+                    EditorUtility.SetDirty(lane);
+                }
+            }
+        }
+
+        // Rebuild incoming links on destination
+        RebuildIncomingLaneLinksAtIntersection(_to);
+
+        // Attach intersection asset if requested
+        if (_attachIntersectionAsset)
+        {
+            AttachIntersectionAsset(_to);
+        }
+
+        return info;
+    }
+
+    private static void CreateRoadNetwork(
+        RoadNetworkAsset _network,
+        Transform _parent,
+        GameObject _wayPrefab,
+        GameObject _lanePrefab,
+        int _laneCount,
+        GameObject _roadPrefab,
+        float _roadPrefabBaseLength,
+        bool _attachRoadPrefab,
+        bool _attachIntersectionAsset
+    )
+    {
+        if (_network == null)
+            return;
+
+        foreach (var conn in _network.connections)
+        {
+            if (conn == null || conn.from == null)
+                continue;
+
+            if (conn.to == null || conn.to.Count == 0)
+                continue;
+
+            foreach (var target in conn.to)
+            {
+                if (target == null || target.intersection == null) continue;
+
+                var dest = target.intersection;
+                int useLaneCount = Mathf.Max(1, target.laneCount);
+
+                // build allowed turns flags
+                LaneTurnFlags allowed = LaneTurnFlags.None;
+                if (target.allowStraight) allowed |= LaneTurnFlags.Straight;
+                if (target.allowLeftTurn) allowed |= LaneTurnFlags.Left;
+                if (target.allowRightTurn) allowed |= LaneTurnFlags.Right;
+
+                if (target.directionType == RoadDirectionType.TwoWay)
+                {
+                    // create both directions
+                    CreateOneWay(conn.from, dest, _parent, _wayPrefab, _lanePrefab, useLaneCount, _roadPrefab, _roadPrefabBaseLength, _attachRoadPrefab, _attachIntersectionAsset, allowed);
+                    CreateOneWay(dest, conn.from, _parent, _wayPrefab, _lanePrefab, useLaneCount, _roadPrefab, _roadPrefabBaseLength, _attachRoadPrefab, _attachIntersectionAsset, allowed);
+                }
+                else
+                {
+                    // one-way from -> dest
+                    CreateOneWay(conn.from, dest, _parent, _wayPrefab, _lanePrefab, useLaneCount, _roadPrefab, _roadPrefabBaseLength, _attachRoadPrefab, _attachIntersectionAsset, allowed);
+                }
+            }
+        }
+
+        AssetDatabase.SaveAssets();
+        Debug.Log($"Road network generation complete: connections={_network.connections.Count}");
     }
 
     private void LoadOrCreateRoadRegistry(bool forceCreate = false)
@@ -261,11 +376,124 @@ public class WayGeneratorWindow : EditorWindow
         laneCount = Mathf.Max(1, laneCount);
 
         EditorGUILayout.Space();
-        // 個別生成のみをサポートします
+        // Network アセットからの一括生成 / エディット
+        EditorGUILayout.LabelField("Road Network (Batch)", EditorStyles.boldLabel);
+        roadNetworkAsset = (RoadNetworkAsset)EditorGUILayout.ObjectField("Network Asset", roadNetworkAsset, typeof(RoadNetworkAsset), false);
+
+        // If the assigned asset was deleted from the Project window, clear reference so user can recreate
+        if (roadNetworkAsset != null && !AssetDatabase.Contains(roadNetworkAsset))
+        {
+            roadNetworkAsset = null;
+        }
+        EditorGUILayout.BeginHorizontal();
+        if (roadNetworkAsset == null)
+        {
+            if (GUILayout.Button("Create New Network Asset"))
+            {
+                RoadNetworkAsset newAsset = ScriptableObject.CreateInstance<RoadNetworkAsset>();
+                string path = AssetDatabase.GenerateUniqueAssetPath("Assets/RoadNetwork.asset");
+                AssetDatabase.CreateAsset(newAsset, path);
+                AssetDatabase.SaveAssets();
+                EditorUtility.FocusProjectWindow();
+                Selection.activeObject = newAsset;
+                roadNetworkAsset = newAsset;
+            }
+        }
+        EditorGUILayout.EndHorizontal();
+
+        if (roadNetworkAsset != null)
+        {
+            // Inline 編集 UI
+            if (roadNetworkAsset.connections == null)
+                roadNetworkAsset.connections = new System.Collections.Generic.List<RoadConnection>();
+
+            if (GUILayout.Button("Add Connection"))
+            {
+                Undo.RecordObject(roadNetworkAsset, "Add Connection");
+                roadNetworkAsset.connections.Add(new RoadConnection());
+                EditorUtility.SetDirty(roadNetworkAsset);
+            }
+
+            for (int ci = 0; ci < roadNetworkAsset.connections.Count; ++ci)
+            {
+                var conn = roadNetworkAsset.connections[ci];
+                EditorGUILayout.BeginVertical("box");
+                EditorGUILayout.BeginHorizontal();
+                conn.from = (Intersection)EditorGUILayout.ObjectField("From", conn.from, typeof(Intersection), true);
+                if (GUILayout.Button("Remove", GUILayout.Width(80)))
+                {
+                    Undo.RecordObject(roadNetworkAsset, "Remove Connection");
+                    roadNetworkAsset.connections.RemoveAt(ci);
+                    EditorUtility.SetDirty(roadNetworkAsset);
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUILayout.EndVertical();
+                    break;
+                }
+                EditorGUILayout.EndHorizontal();
+
+                // Ensure to list exists
+                if (conn.to == null)
+                    conn.to = new System.Collections.Generic.List<RoadTarget>();
+
+                if (GUILayout.Button("Add Target"))
+                {
+                    Undo.RecordObject(roadNetworkAsset, "Add Target");
+                    conn.to.Add(new RoadTarget());
+                    EditorUtility.SetDirty(roadNetworkAsset);
+                }
+
+                for (int ti = 0; ti < conn.to.Count; ++ti)
+                {
+                    var target = conn.to[ti];
+                    EditorGUILayout.BeginVertical("helpbox");
+                    EditorGUILayout.BeginHorizontal();
+                    target.intersection = (Intersection)EditorGUILayout.ObjectField("To", target.intersection, typeof(Intersection), true);
+                    if (GUILayout.Button("Remove Target", GUILayout.Width(110)))
+                    {
+                        Undo.RecordObject(roadNetworkAsset, "Remove Target");
+                        conn.to.RemoveAt(ti);
+                        EditorUtility.SetDirty(roadNetworkAsset);
+                        EditorGUILayout.EndHorizontal();
+                        EditorGUILayout.EndVertical();
+                        break;
+                    }
+                    EditorGUILayout.EndHorizontal();
+
+                    target.directionType = (RoadDirectionType)EditorGUILayout.EnumPopup("Direction", target.directionType);
+                    target.laneCount = EditorGUILayout.IntField("Lane Count", Mathf.Max(1, target.laneCount));
+                    EditorGUILayout.LabelField("Allowed Turns");
+                    EditorGUILayout.BeginHorizontal();
+                    target.allowLeftTurn = EditorGUILayout.ToggleLeft("Left", target.allowLeftTurn, GUILayout.Width(60));
+                    target.allowStraight = EditorGUILayout.ToggleLeft("Straight", target.allowStraight, GUILayout.Width(80));
+                    target.allowRightTurn = EditorGUILayout.ToggleLeft("Right", target.allowRightTurn, GUILayout.Width(70));
+                    EditorGUILayout.EndHorizontal();
+
+                    EditorGUILayout.EndVertical();
+                }
+
+                EditorGUILayout.EndVertical();
+            }
+
+            EditorGUILayout.Space();
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("Save Network Asset"))
+            {
+                EditorUtility.SetDirty(roadNetworkAsset);
+                AssetDatabase.SaveAssets();
+            }
+
+            if (GUILayout.Button("Generate Road Network from Asset"))
+            {
+                CreateRoadNetwork(roadNetworkAsset, waysParent, wayPrefab, lanePrefab, laneCount, roadPrefab, roadPrefabBaseLength, attachRoadPrefab, attachIntersectionAsset);
+            }
+            EditorGUILayout.EndHorizontal();
+        }
+
+        EditorGUILayout.Space();
+        // 個別生成
         GUI.enabled = intersectionA != null && intersectionB != null && intersectionA != intersectionB;
         if (GUILayout.Button("双方向のWayを生成してLaneLinkまで設定"))
         {
-            // 個別生成 (A <-> B)
             CreateTwoWayWays(intersectionA, intersectionB, waysParent, wayPrefab, lanePrefab, laneCount, roadPrefab, roadPrefabBaseLength, attachRoadPrefab, attachIntersectionAsset);
         }
         GUI.enabled = true;
