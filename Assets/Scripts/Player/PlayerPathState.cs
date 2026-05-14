@@ -9,6 +9,7 @@ public sealed class PlayerPathState
     [SerializeField] private Lane currentLane;
     [SerializeField] private float currentS = 0.0f;
 
+    //Œ»ÝƒŒ[ƒ“Žæ“¾
     public Lane CurrentLane
     {
         get => currentLane;

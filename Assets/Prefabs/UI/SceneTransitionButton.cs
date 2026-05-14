@@ -1,38 +1,38 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class SceneTransitionButton : MonoBehaviour
 {
-    [Header("‚±‚Ìƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚½‚Ì‘JˆÚæ")]
-    [Tooltip("ƒvƒ‹ƒ_ƒEƒ“‚©‚ç‘JˆÚæ‚ÌƒV[ƒ“‚ğ‘I‚ñ‚Å‚­‚¾‚³‚¢")]
+    [Header("ã“ã®ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ãŸæ™‚ã®é·ç§»å…ˆ")]
+    [Tooltip("ãƒ—ãƒ«ãƒ€ã‚¦ãƒ³ã‹ã‚‰é·ç§»å…ˆã®ã‚·ãƒ¼ãƒ³ã‚’é¸ã‚“ã§ãã ã•ã„")]
     public SceneName nextScene;
 
-    // ƒoƒO—\–hF‘JˆÚ’†ƒtƒ‰ƒO
+    // ãƒã‚°äºˆé˜²ï¼šé·ç§»ä¸­ãƒ•ãƒ©ã‚°
     private bool isTransitioning = false;
 
     public void OnClickTransition()
     {
-        // ‡@ “ñdƒ[ƒh–h~
+        // â‘  äºŒé‡ãƒ­ãƒ¼ãƒ‰é˜²æ­¢
         if (isTransitioning) return;
         isTransitioning = true;
 
-        // ‡A ƒ|[ƒYó‘Ô‚Ì‰ğœ
+        // â‘¡ ãƒãƒ¼ã‚ºçŠ¶æ…‹ã®è§£é™¤
         Time.timeScale = 1f;
 
-        // ‡B —áŠOˆ—itry-catchj‚ğ—p‚¢‚½ˆÀ‘S‚ÈƒV[ƒ“‘JˆÚ
-        Debug.Log($"ƒV[ƒ“‚ğƒ[ƒh‚µ‚Ü‚·: {nextScene}");
+        // â‘¢ ä¾‹å¤–å‡¦ç†ï¼ˆtry-catchï¼‰ã‚’ç”¨ã„ãŸå®‰å…¨ãªã‚·ãƒ¼ãƒ³é·ç§»
+        Debug.Log($"ã‚·ãƒ¼ãƒ³ã‚’ãƒ­ãƒ¼ãƒ‰ã—ã¾ã™: {nextScene}");
 
         try
         {
-            // ƒV[ƒ“‚Ìƒ[ƒh‚ğ‚İ‚é
+            // ã‚·ãƒ¼ãƒ³ã®ãƒ­ãƒ¼ãƒ‰ã‚’è©¦ã¿ã‚‹
             SceneManager.LoadScene(nextScene.ToString());
         }
         catch (System.Exception e)
         {
-            // Build Settings‚Ì“o˜^–Y‚ê“™‚ÅƒGƒ‰[‚ª‹N‚«‚½ê‡‚Ì•œ‹Aˆ—
-            Debug.LogError($"ƒV[ƒ“‘JˆÚ‚É¸”s‚µ‚Ü‚µ‚½BBuild Settings‚ğŠm”F‚µ‚Ä‚­‚¾‚³‚¢BƒGƒ‰[Ú×: {e.Message}");
+            // Build Settingsã®ç™»éŒ²å¿˜ã‚Œç­‰ã§ã‚¨ãƒ©ãƒ¼ãŒèµ·ããŸå ´åˆã®å¾©å¸°å‡¦ç†
+            Debug.LogError($"ã‚·ãƒ¼ãƒ³é·ç§»ã«å¤±æ•—ã—ã¾ã—ãŸã€‚Build Settingsã‚’ç¢ºèªã—ã¦ãã ã•ã„ã€‚ã‚¨ãƒ©ãƒ¼è©³ç´°: {e.Message}");
 
-            // ƒtƒ‰ƒO‚ğ–ß‚µ‚ÄAÄ“xƒ{ƒ^ƒ“‚ğ‰Ÿ‚¹‚é‚æ‚¤‚É‹~Ï‚·‚é
+            // ãƒ•ãƒ©ã‚°ã‚’æˆ»ã—ã¦ã€å†åº¦ãƒœã‚¿ãƒ³ã‚’æŠ¼ã›ã‚‹ã‚ˆã†ã«æ•‘æ¸ˆã™ã‚‹
             isTransitioning = false;
         }
     }
