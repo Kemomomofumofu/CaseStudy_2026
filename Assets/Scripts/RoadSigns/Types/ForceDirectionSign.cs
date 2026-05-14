@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem.Utilities;
 
 /// <summary>
 /// 進行方向指定標識
@@ -11,20 +12,17 @@ public sealed class ForceDirectionSign : RoadSignBase
     [SerializeField] private TurnDirection forceDirection = TurnDirection.Straight;
 
     /// <summary>
-    /// 標識の効果を評価して追加する
+    /// 評価に追加
     /// </summary>
-    /// <param name="_context">評価コンテキスト</param>
-    /// <param name="_evaluation">評価結果</param>
     public override void Evaluate(RoadSignQueryContext _context, RoadSignEvaluation _evaluation)
     {
         _evaluation.AddEffect(new ForceDirectionEffect(forceDirection));
     }
 
     /// <summary>
-    /// 指定方向を変更する
+    /// 指定方向を設定する
     /// </summary>
-    /// <param name="_direction">指定する方向</param>
-    public void SetForceDirection(TurnDirection _direction)
+    public void Configure(TurnDirection _direction)
     {
         forceDirection = _direction;
     }

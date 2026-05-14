@@ -62,10 +62,7 @@ public sealed class RoadSignPlacementController : MonoBehaviour
         Quaternion rotation = signPrefab.transform.rotation;
 
         RoadSignBase instance = Instantiate(signPrefab, position, rotation);
-        if (overrideDirection && instance.TryGetComponent(out ForceDirectionSign forceSign))
-        {
-            forceSign.SetForceDirection(direction);
-        }
+        ApplyDefinition(instance, definition, overrideDirection, direction);
 
         Type signType = signPrefab.GetType();
         if (placedByType.TryGetValue(signType, out RoadSignBase existing) && existing != null)
@@ -74,6 +71,43 @@ public sealed class RoadSignPlacementController : MonoBehaviour
         }
 
         placedByType[signType] = instance;
+    }
+
+    private static void ApplyDefinition(RoadSignBase _instance, RoadSignDefinition _definition, bool _overrideDirection, TurnDirection _direction)
+    {
+        if (_overrideDirection)
+        {
+            if (_instance.TryGetComponent(out ForceDirectionSign forceSign))
+            {
+                forceSign.Configure(_direction);
+            }
+
+            if (_instance.TryGetComponent(out BlockDirectionSign blockSign))
+            {
+                blockSign.Configure(_direction);
+            }
+        }
+
+        var data = _definition.EffectData;
+        if (data == null)
+        {
+            return;
+        }
+
+        if (_instance.TryGetComponent(out SpeedLimitSign speedLimitSign))
+        {
+            speedLimitSign.Configure(data.FloatValue);
+        }
+
+        if (_instance.TryGetComponent(out AccelerationSign accelerationSign))
+        {
+            accelerationSign.Configure(data.FloatValue);
+        }
+
+        if (_instance.TryGetComponent(out LaneReductionSign laneReductionSign))
+        {
+            laneReductionSign.Configure(data.IntValue);
+        }
     }
 
     /// <summary>
