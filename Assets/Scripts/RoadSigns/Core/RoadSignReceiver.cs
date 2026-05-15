@@ -7,13 +7,13 @@ using UnityEngine;
 /// </summary>
 public class RoadSignReceiver : MonoBehaviour
 {
-    private readonly List<RoadSignBase> activeSigns = new();
+    private readonly List<RoadSign> activeSigns = new();
 
     /// <summary>
     /// 標識追加
     /// </summary>
     /// <param name="_sign">追加する標識</param>
-    public void AddSign(RoadSignBase _sign)
+    public void AddSign(RoadSign _sign)
     {
         if (!activeSigns.Contains(_sign))
         {
@@ -24,7 +24,7 @@ public class RoadSignReceiver : MonoBehaviour
     /// 標識削除
     /// </summary>
     /// <param name="_sign">削除する標識</param>
-    public void RemoveSign(RoadSignBase _sign)
+    public void RemoveSign(RoadSign _sign)
     {
         activeSigns.Remove(_sign);
     }

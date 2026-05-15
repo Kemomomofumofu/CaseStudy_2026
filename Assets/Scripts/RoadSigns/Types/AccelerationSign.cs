@@ -3,7 +3,7 @@
 /// <summary>
 /// 加速標識
 /// </summary>
-public sealed class AccelerationSign : RoadSignBase
+public sealed class AccelerationSign : RoadSign
 {
     [SerializeField] private float deltaSpeed = 2f;
 

@@ -1,15 +1,16 @@
 using UnityEngine;
 
 /// <summary>
-/// 標識の基底クラス
+/// 標識の共通クラス
 /// </summary>
-public abstract class RoadSignBase : MonoBehaviour
+public class RoadSign : MonoBehaviour
 {
     [Header("基本設定")]
-    [SerializeField] private int priority = 0;
+    [SerializeField] private RoadSignDefinition definition = null;
     [SerializeField] private Collider influenceTrigger = null;
 
-    public int Priority => priority;
+    public int Priority => definition != null ? definition.Priority : 0;
+
 
     /// <summary>
     /// 初期化
@@ -54,5 +55,24 @@ public abstract class RoadSignBase : MonoBehaviour
     /// <summary>
     /// 標識の効果を評価する
     /// </summary>
-    public abstract void Evaluate(RoadSignQueryContext _context, RoadSignEvaluation _evaluation);
+    public virtual void Evaluate(RoadSignQueryContext _context, RoadSignEvaluation _evaluation)
+    {
+        if (definition == null || definition.Effects == null) return;
+
+        for(int i = 0; i < definition.Effects.Count; ++i)
+        {
+            var effect = definition.Effects[i];
+            if (effect == null) continue;
+
+            effect.Apply(_context, _evaluation);
+        }
+    }
+
+    /// <summary>
+    /// 標識の定義を設定する
+    /// </summary>
+    public void SetDefinition(RoadSignDefinition _definition)
+    {
+        definition = _definition;
+    }
 }

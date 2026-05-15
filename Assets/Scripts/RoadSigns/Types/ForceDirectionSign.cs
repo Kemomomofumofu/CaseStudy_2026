@@ -5,7 +5,7 @@ using UnityEngine.InputSystem.Utilities;
 /// 進行方向指定標識
 /// デフォルトは直進
 /// </summary>
-public sealed class ForceDirectionSign : RoadSignBase
+public sealed class ForceDirectionSign : RoadSign
 {
     [Header("進行指示設定")]
     [Tooltip("指定する方向")]

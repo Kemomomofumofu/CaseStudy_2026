@@ -1,29 +1,10 @@
 ﻿using UnityEngine;
 
 /// <summary>
-/// 制限速度を示す道路標識
+/// 互換用: 既存Prefab参照を維持するためのクラス
 /// </summary>
-public class SpeedLimitSign : RoadSignBase
+public class SpeedLimitSign : RoadSign
 {
-    [SerializeField]
-    [Tooltip("制限速度")]
-    private float limitSpeed = 10.0f;
 
-    /// <summary>
-    /// 評価に追加
-    /// </summary>
-    public override void Evaluate(RoadSignQueryContext _context, RoadSignEvaluation _evaluation)
-    {
-        _evaluation.AddEffect(new SpeedLimitEffect(limitSpeed));
-    }
-
-    /// <summary>
-    /// 制限速度を設定する
-    /// </summary>
-    /// <param name="_limitSpeed"></param>
-    public void Configure(float _limitSpeed)
-    {
-        limitSpeed = _limitSpeed;
-    }
 }
 

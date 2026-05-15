@@ -29,25 +29,14 @@ public sealed class RoadSignHandController : MonoBehaviour
     /// <summary>
     /// 選択中の標識を1枚消費する
     /// </summary>
-    public bool TryConsumeSelected(out RoadSignBase _signPrefab, out bool _overrideDirection, out TurnDirection _direction)
+    public bool TryConsumeSelected(out RoadSign _signPrefab)
     {
         _signPrefab = null;
-        _overrideDirection = false;
-        _direction = TurnDirection.Straight;
 
-        if (!TryGetSelected(out RoadSignHandEntry entry))
-        {
-            return false;
-        }
-
-        if (!entry.TryConsume())
-        {
-            return false;
-        }
+        if (!TryGetSelected(out RoadSignHandEntry entry)) return false;
+        if (!entry.TryConsume()) return false;
 
         _signPrefab = entry.SignPrefab;
-        _overrideDirection = entry.OverrideDirection;
-        _direction = entry.DirectionOverride;
 
         Changed?.Invoke();
         return true;
@@ -57,27 +46,16 @@ public sealed class RoadSignHandController : MonoBehaviour
     /// 選択中の標識を一枚消費する。定義も一緒に返す
     /// </summary>
     /// <returns></returns>
-    public bool TryConsumeSelected(out RoadSignDefinition _definition, out RoadSignBase _signPrefab, out bool _overrideDirection, out TurnDirection _direction)
+    public bool TryConsumeSelected(out RoadSignDefinition _definition, out RoadSign _signPrefab)
     {
         _definition = null;
         _signPrefab = null;
-        _overrideDirection = false;
-        _direction = TurnDirection.Straight;
 
-        if (!TryGetSelected(out RoadSignHandEntry entry))
-        {
-            return false;
-        }
-
-        if (!entry.TryConsume())
-        {
-            return false;
-        }
+        if (!TryGetSelected(out RoadSignHandEntry entry)) return false;
+        if (!entry.TryConsume()) return false;
 
         _definition = entry.Definition;
         _signPrefab = entry.SignPrefab;
-        _overrideDirection = entry.OverrideDirection;
-        _direction = entry.DirectionOverride;
 
         Changed?.Invoke();
         return true;
@@ -90,16 +68,10 @@ public sealed class RoadSignHandController : MonoBehaviour
     {
         _entry = null;
 
-        if (entries.Count == 0 || selectedIndex < 0 || selectedIndex >= entries.Count)
-        {
-            return false;
-        }
+        if (entries.Count == 0 || selectedIndex < 0 || selectedIndex >= entries.Count) return false;
 
         RoadSignHandEntry entry = entries[selectedIndex];
-        if (entry == null || !entry.CanUse)
-        {
-            return false;
-        }
+        if (entry == null || !entry.CanUse) return false;
 
         _entry = entry;
         return true;

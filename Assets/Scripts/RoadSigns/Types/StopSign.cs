@@ -3,7 +3,7 @@
 /// <summary>
 /// 一時停止を示す道路標識
 /// </summary>
-public sealed class StopSign : RoadSignBase
+public sealed class StopSign : RoadSign
 {
     /// <summary>
     /// 評価に追加

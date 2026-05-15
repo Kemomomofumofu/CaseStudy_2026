@@ -3,7 +3,7 @@
 /// <summary>
 /// 車線減少を示す道路標識
 /// </summary>
-public sealed class LaneReductionSign : RoadSignBase
+public sealed class LaneReductionSign : RoadSign
 {
     [Tooltip("減少する車線の数")]
     [SerializeField] private int reduceCount = 1;

@@ -3,7 +3,7 @@
 /// <summary>
 /// ランダムな方向を示す道路標識
 /// </summary>
-public sealed class RandomDirectionSign : RoadSignBase
+public sealed class RandomDirectionSign : RoadSign
 {
     /// <summary>
     /// 評価に追加

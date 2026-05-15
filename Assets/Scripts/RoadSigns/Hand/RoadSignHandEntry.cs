@@ -11,9 +11,7 @@ public sealed class RoadSignHandEntry
 
     public string DisplayName => definition != null ? definition.DisplayName : string.Empty;
     public Sprite Icon => definition != null ? definition.Icon : null;
-    public RoadSignBase SignPrefab => definition != null ? definition.SignPrefab : null;
-    public bool OverrideDirection => definition != null && definition.OverrideDirection;
-    public TurnDirection DirectionOverride => definition != null ? definition.DirectionOverride : TurnDirection.Straight;
+    public RoadSign SignPrefab => definition != null ? definition.SignPrefab : null;
 
     public bool CanUse => definition != null && definition.SignPrefab != null && count > 0;
 
