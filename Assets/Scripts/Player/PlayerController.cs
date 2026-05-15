@@ -81,7 +81,7 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
-        if(signReceiver == null)
+        if (signReceiver == null)
         {
             signReceiver = GetComponent<RoadSignReceiver>();
         }
@@ -120,13 +120,13 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void UpdateStopTimer()
     {
-        if(!isStopping)
+        if (!isStopping)
         {
             return;
         }
 
         stopTimer -= Time.deltaTime;
-        if(stopTimer <= 0.0f)
+        if (stopTimer <= 0.0f)
         {
             stopTimer = 0.0f;
             isStopping = false;
@@ -153,7 +153,7 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateInput()
     {
-        if(isStopping)
+        if (isStopping)
         {
             return;
         }
@@ -210,25 +210,6 @@ public class PlayerController : MonoBehaviour
         }
 
         queuedTurnDirection = ResolveTurnDirectionBySign();
-    }
-
-    /// <summary>
-    /// 標識の評価結果から進行方向を決定する
-    /// </summary>
-    private TurnDirection ResolveTurnDirectionBySign()
-    {
-        if (signReceiver == null)
-        {
-            return TurnDirection.Straight;
-        }
-
-        RoadSignEvaluation evaluation = EvaluateSigns(TurnDirection.Straight);
-        if (signResolver.TryResolveForcedDirection(evaluation, out TurnDirection forcedDirection))
-        {
-            return forcedDirection;
-        }
-
-        return TurnDirection.Straight;
     }
 
     /// <summary>
@@ -343,7 +324,7 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void UpdateMovement()
     {
-        if(isStopping)
+        if (isStopping)
         {
             return;
         }
@@ -541,12 +522,11 @@ public class PlayerController : MonoBehaviour
         aiDecisionTimer = 0f;
     }
 
+
     #region --- 標識関連 ---
     /// <summary>
     /// 標識の評価を行う
     /// </summary>
-    /// <param name="_intendedDirection">意図する進行方向</param>
-    /// <returns></returns>
     private RoadSignEvaluation EvaluateSigns(TurnDirection _intendedDirection)
     {
         var context = new RoadSignQueryContext
@@ -557,25 +537,22 @@ public class PlayerController : MonoBehaviour
             CurrentSpeed = moveSpeed
         };
 
+        if (signReceiver == null) return new RoadSignEvaluation();
+
         return signReceiver.Evaluate(context);
     }
 
     /// <summary>
-    /// 標識の評価結果から移動速度を決定する
+    /// 標識を考慮した移動速度を返す
     /// </summary>
     private float ResolveMoveSpeedBySign()
     {
-        if(signReceiver == null)
-        {
-            return moveSpeed;
-        }
-
         RoadSignEvaluation evaluation = EvaluateSigns(queuedTurnDirection);
-        return signResolver.ResolveMaxSpeed(evaluation, moveSpeed);
+        return signResolver.ResolveMoveSpeed(evaluation, moveSpeed);
     }
 
     /// <summary>
-    /// 標識の評価結果から移動方向に進行可能かを決定する
+    /// 標識を考慮して指定方向に進めるか判定する
     /// </summary>
     private bool CanMoveBySign(TurnDirection _direction)
     {
@@ -585,6 +562,30 @@ public class PlayerController : MonoBehaviour
         }
         RoadSignEvaluation evaluation = EvaluateSigns(_direction);
         return signResolver.CanMove(evaluation, _direction);
+    }
+
+    /// <summary>
+    /// 標識を考慮して進行方向を決定する
+    /// </summary>
+
+    private TurnDirection ResolveTurnDirectionBySign()
+    {
+        RoadSignEvaluation evaluation = EvaluateSigns(queuedTurnDirection);
+        return signResolver.ResolveTurnDirection(evaluation, queuedTurnDirection);
+    }
+
+    /// <summary>
+    /// 標識を考慮して進行方向を決定する
+    /// </summary>
+
+    private void ApplyStopBySign()
+    {
+        RoadSignEvaluation evaluation = EvaluateSigns(queuedTurnDirection);
+
+        if (!signResolver.RequiresStop(evaluation)) return;
+
+        isStopping = true;
+        stopTimer = obstacleStopDuration;
     }
     #endregion --- 標識関連 ---
 }

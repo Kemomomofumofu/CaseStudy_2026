@@ -1,15 +1,15 @@
 ﻿using UnityEngine;
 
 /// <summary>
-/// ブロックの方向の効果のアセット
+/// 特定方向への進行を禁止する標識効果
 /// </summary>
-[CreateAssetMenu(menuName = "RoadSign/Effects/BlockDirection", fileName = "Eff_BlockDirection")]
+[CreateAssetMenu(menuName = "RoadSigns/Effects/BlockDirection", fileName = "Eff_BlockDirection")]
 public sealed class BlockDirectionEffectAsset : RoadSignEffectAsset
 {
-    [SerializeField] private TurnDirection blockDirection = TurnDirection.Straight;
+    [SerializeField] private TurnDirection blockedDirection = TurnDirection.Right;
 
     public override void Apply(RoadSignQueryContext _context, RoadSignEvaluation _evaluation)
     {
-        _evaluation.AddEffect(new BlockDirectionEffect(blockDirection));
+        _evaluation.BlockDirection(blockedDirection);
     }
 }

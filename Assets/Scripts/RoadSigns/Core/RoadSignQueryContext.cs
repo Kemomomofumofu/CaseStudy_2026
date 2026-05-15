@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
 
 /// <summary>
-/// 標識のルールを評価する際のコンテキスト情報をまとめたクラス
-/// 例： Actorが大型車なら...といった具合で物によって評価を変えれるようにするのに必要
+/// 標識を評価するときに渡す状況情報
 /// </summary>
 public class RoadSignQueryContext
 {

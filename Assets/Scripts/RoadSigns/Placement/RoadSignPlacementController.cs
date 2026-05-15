@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -14,17 +12,12 @@ public sealed class RoadSignPlacementController : MonoBehaviour
     [Header("éËéDä«óù")]
     [SerializeField] private RoadSignHandController handController = null;
 
-    private readonly Dictionary<Type, RoadSign> placedByType = new();
-
     /// <summary>
     /// ÉJÉÅÉâñ¢éwíËéûÇ… MainCamera ÇéÊìæÇ∑ÇÈ
     /// </summary>
     private void Awake()
     {
-        if (targetCamera == null)
-        {
-            targetCamera = Camera.main;
-        }
+        if (targetCamera == null) targetCamera = Camera.main;
     }
 
     /// <summary>
@@ -46,14 +39,6 @@ public sealed class RoadSignPlacementController : MonoBehaviour
 
         RoadSign instance = Instantiate(signPrefab, position, rotation);
         instance.SetDefinition(definition);
-
-        Type signType = signPrefab.GetType();
-        if (placedByType.TryGetValue(signType, out RoadSign existing) && existing != null)
-        {
-            Destroy(existing.gameObject);
-        }
-
-        placedByType[signType] = instance;
     }
 
     /// <summary>
@@ -64,10 +49,7 @@ public sealed class RoadSignPlacementController : MonoBehaviour
         _definition = null;
         _signPrefab = null;
 
-        if (handController == null)
-        {
-            return false;
-        }
+        if (handController == null) return false;
 
         return handController.TryConsumeSelected(out _definition, out _signPrefab);
     }

@@ -1,104 +1,64 @@
-﻿using System;
+﻿using UnityEngine;
 
 public sealed class PlayerSignResolver
 {
-    private readonly Random random = new();
-
     /// <summary>
-    /// 道路標識の評価結果から、指定した進行方向に進めるかどうかを判定する
+    /// 指定方向に進めるか判定する
     /// </summary>
     public bool CanMove(RoadSignEvaluation _evaluation, TurnDirection _direction)
     {
-        foreach (var effect in _evaluation.Effects)
-        {
-            // 進行方向が通行止めになっていないか
-            if (effect is RoadClosedEffect) return false;
-            // 進行方向がブロックされていないか
-            if ((effect is BlockDirectionEffect block && block.Direction == _direction)) return false;
-        }
+        if (_evaluation == null) return true;
 
-        return true;
+        return !_evaluation.IsBlocked(_direction);
     }
 
     /// <summary>
-    /// 道路標識の評価結果から、強制的に進まなければならない方向があるかどうかを判定し、あればその方向を返す
+    /// 標識評価後の移動速度を返す
     /// </summary>
-    public bool TryResolveForcedDirection(RoadSignEvaluation _evaluation, out TurnDirection _direction)
+    public float ResolveMoveSpeed(RoadSignEvaluation _evaluation, float _baseSpeed)
     {
-        foreach (var effect in _evaluation.Effects)
-        {
-            // 進行方向が強制されている場合、その方向を返す
-            if (effect is ForceDirectionEffect force)
-            {
-                _direction = force.Direction;
-                return true;
-            }
+        if (_evaluation == null) return _baseSpeed;
 
-            // 進行方向がランダムに決まる場合、ランダムに方向を選んで返す
-            if (effect is RandomDirectionEffect)
-            {
-                _direction = (TurnDirection)random.Next(0, 4);
-                return true;
-            }
-        }
-
-        _direction = TurnDirection.Straight;
-        return false;
+        return _evaluation.ResolveMoveSpeed(_baseSpeed);
     }
 
     /// <summary>
-    /// 道路標識の評価結果から、最大速度を決定する。
+    /// 標識評価後の進行方向を返す
     /// </summary>
-    public float ResolveMaxSpeed(RoadSignEvaluation _evaluation, float _defaultSpeed)
+    public TurnDirection ResolveTurnDirection(RoadSignEvaluation _evaluation, TurnDirection _defaultDirection)
     {
-        float result = _defaultSpeed;
-        foreach (var effect in _evaluation.Effects)
-        {
-            if (effect is SpeedLimitEffect speedLimit && speedLimit.LimitSpeed < result)
-            {
-                result = speedLimit.LimitSpeed;
-            }
+        if (_evaluation == null) return _defaultDirection;
+        if (_evaluation.RoadClosed) return _defaultDirection;
 
-            if( effect is AccelerationEffect acceleration)
-            {
-                result += acceleration.DeltaSpeed;
-            }
-        }
+        if (_evaluation.TryGetForcedDirection(out TurnDirection forcedDirection)) return forcedDirection;
 
-        return result;
+        if (_evaluation.RandomDirectionRequested) return GetRandomDirection();
+
+        return _defaultDirection;
     }
 
     /// <summary>
-    /// 道路標識の評価結果から、停止が必要かどうかを判定する
+    /// 一時停止が必要か判定する
     /// </summary>
     public bool RequiresStop(RoadSignEvaluation _evaluation)
     {
-        foreach (var effect in _evaluation.Effects)
-        {
-            if (effect is StopEffect)
-            {
-                return true;
-            }
-        }
-
-        return false;
+        return _evaluation != null && _evaluation.RequiresStop;
     }
 
     /// <summary>
-    /// 道路標識の評価結果から、車線減少の数を決定する。
-    /// todo: 実装途中
+    /// 車線減少数を返す
     /// </summary>
     public int ResolveLaneReduction(RoadSignEvaluation _evaluation)
     {
-        int reduce = 0;
-        foreach (var effect in _evaluation.Effects)
-        {
-            if (effect is LaneReductionEffect laneReduction)
-            {
-                reduce = Math.Max(reduce, laneReduction.ReduceCount);
-            }
-        }
+        return _evaluation != null ? _evaluation.LaneReductionCount : 0;
+    }
 
-        return reduce;
+    /// <summary>
+    /// ランダム方向を決定する
+    /// </summary>
+    private TurnDirection GetRandomDirection()
+    {
+        int value = Random.Range(0, 4);
+        return (TurnDirection)value;
     }
 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -45,23 +46,18 @@ public class RoadSign : MonoBehaviour
     }
 
     /// <summary>
-    /// ‚±‚Ì•W¯‚ªŒ»İ‚Ìó‹µ‚ÉŠÖ˜A‚·‚é‚©‚ğ”»’è‚·‚é
-    /// </summary>
-    public virtual bool IsRelevant(RoadSignQueryContext _context)
-    {
-        return true;
-    }
-
-    /// <summary>
     /// •W¯‚ÌŒø‰Ê‚ğ•]‰¿‚·‚é
     /// </summary>
     public virtual void Evaluate(RoadSignQueryContext _context, RoadSignEvaluation _evaluation)
     {
-        if (definition == null || definition.Effects == null) return;
+        if (definition == null) return;
 
-        for(int i = 0; i < definition.Effects.Count; ++i)
+        IReadOnlyList<RoadSignEffectAsset> effects = definition.Effects;
+        if(effects == null) return;
+
+        for (int i = 0; i < effects.Count; ++i)
         {
-            var effect = definition.Effects[i];
+            var effect = effects[i];
             if (effect == null) continue;
 
             effect.Apply(_context, _evaluation);

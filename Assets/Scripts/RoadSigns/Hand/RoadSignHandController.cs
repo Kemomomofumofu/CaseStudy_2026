@@ -13,39 +13,19 @@ public sealed class RoadSignHandController : MonoBehaviour
     public int SelectedIndex => selectedIndex;
 
     /// <summary>
-    /// 表示/配置の対象を選択する
+    /// 使用する手札を選択する
     /// </summary>
     public void SelectIndex(int _index)
     {
-        if (_index < 0 || _index >= entries.Count)
-        {
-            return;
-        }
+        if (_index < 0 || _index >= entries.Count) return;
 
         selectedIndex = _index;
         Changed?.Invoke();
     }
 
     /// <summary>
-    /// 選択中の標識を1枚消費する
+    /// 選択中の標識を1枚消費し、DefinitionとPrefabを返す
     /// </summary>
-    public bool TryConsumeSelected(out RoadSign _signPrefab)
-    {
-        _signPrefab = null;
-
-        if (!TryGetSelected(out RoadSignHandEntry entry)) return false;
-        if (!entry.TryConsume()) return false;
-
-        _signPrefab = entry.SignPrefab;
-
-        Changed?.Invoke();
-        return true;
-    }
-
-    /// <summary>
-    /// 選択中の標識を一枚消費する。定義も一緒に返す
-    /// </summary>
-    /// <returns></returns>
     public bool TryConsumeSelected(out RoadSignDefinition _definition, out RoadSign _signPrefab)
     {
         _definition = null;
@@ -62,7 +42,7 @@ public sealed class RoadSignHandController : MonoBehaviour
     }
 
     /// <summary>
-    /// 選択中のエントリを取得する
+    /// 選択中の手札情報を取得する
     /// </summary>
     public bool TryGetSelected(out RoadSignHandEntry _entry)
     {

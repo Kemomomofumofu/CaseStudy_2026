@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 /// <summary>
-/// 標識の効果のアセット
+/// 標識効果のScriptableObject基底クラス
 /// </summary>
 public abstract class RoadSignEffectAsset : ScriptableObject
 {

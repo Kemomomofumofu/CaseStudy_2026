@@ -10,6 +10,6 @@ public sealed class SpeedLimitEffectAsset : RoadSignEffectAsset
 
     public override void Apply(RoadSignQueryContext _context, RoadSignEvaluation _evaluation)
     {
-        _evaluation.AddEffect(new SpeedLimitEffect(limitSpeed));
+        _evaluation.SetSpeedLimit(limitSpeed);
     }
 }
