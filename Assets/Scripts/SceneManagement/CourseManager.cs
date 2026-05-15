@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using TMPro; // TextMeshProを使うための宣言
 
 /// <summary>
 /// コース内の進行（レース中か、ゴールしたか）を管理し、勝敗に応じたリザルトUIを制御する監督クラス。
@@ -12,6 +13,9 @@ public class CourseManager : MonoBehaviour
     [Header("【UI設定：勝敗で切り替えるパーツ】")]
     [Tooltip("勝った時だけ押せるようにする『NEXT STAGE』ボタンのオブジェクトを入れます")]
     public GameObject nextStageButton;
+
+    [Tooltip("勝敗の文字（YOU WIN / YOU LOSE）を表示する TextMeshPro のオブジェクトを入れます")]
+    public TextMeshProUGUI resultText;
 
     // ゲームが現在進行中かどうかを判定するフラグ
     private bool isRacing = false;
@@ -32,7 +36,7 @@ public class CourseManager : MonoBehaviour
     }
 
     // ----------------------------------------------------
-    // ② 勝利した時（ダミーゴールに触れた時など）に呼ばれる
+    // ② 勝利した時に呼ばれる
     // ----------------------------------------------------
     public void OnPlayerWin()
     {
@@ -42,37 +46,51 @@ public class CourseManager : MonoBehaviour
         // リザルト画面全体を表示
         resultUI.SetActive(true);
 
-        // --- ここからが「最後のステージ」対策の追加コード ---
+        // テキストを勝ち仕様に変更
+        if (resultText != null)
+        {
+            resultText.text = "YOU WIN";
+            resultText.color = Color.yellow;
+        }
+
+        // --- 最後のステージ対策 ---
         int currentBuildIndex = UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex;
 
-        // 次のシーンが Build Settings に存在するか確認
         if (currentBuildIndex + 1 < UnityEngine.SceneManagement.SceneManager.sceneCountInBuildSettings)
         {
-            // 次があるなら、NEXTボタンを表示する
             if (nextStageButton != null) nextStageButton.SetActive(true);
         }
         else
         {
-            // 次がない（最後）なら、NEXTボタンは絶対に隠したままにする！
             if (nextStageButton != null) nextStageButton.SetActive(false);
             Debug.Log("最終ステージのため、NEXTボタンを表示しませんでした。");
         }
-        // --- ここまで ---
+
+        // ゲーム内時間を止める
+        Time.timeScale = 0f;
     }
 
     // ----------------------------------------------------
-    // ③ 敗北した時（後日、タイムアップ時などに呼ばれる）
+    // ③ 敗北した時に呼ばれる
     // ----------------------------------------------------
     public void OnPlayerLose()
     {
         if (!isRacing) return;
         isRacing = false;
 
-        Debug.Log("プレイヤーの敗北...NEXTボタンを隠してリザルトを表示します。");
-
         // 負けたのでNEXTボタンを非表示（オフ）にする
         if (nextStageButton != null) nextStageButton.SetActive(false);
 
         resultUI.SetActive(true);
+
+        // テキストを負け仕様に変更
+        if (resultText != null)
+        {
+            resultText.text = "YOU LOSE";
+            resultText.color = new Color(0.2f, 0.5f, 1f);
+        }
+
+        // ゲーム内時間を止める
+        Time.timeScale = 0f;
     }
 }
