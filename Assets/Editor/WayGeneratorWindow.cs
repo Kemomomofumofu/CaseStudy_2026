@@ -39,6 +39,8 @@ public class WayGeneratorWindow : EditorWindow
     private string tagFilter = "All";
     // ネットワーク一括生成用アセット
     private RoadNetworkAsset roadNetworkAsset;
+    // Scroll position for the editor window UI
+    private Vector2 scrollPos = Vector2.zero;
 
     private struct LaneLinkSeed
     {
@@ -227,6 +229,9 @@ public class WayGeneratorWindow : EditorWindow
 
     private void OnGUI()
     {
+        // Begin scroll view so the window content can be scrolled when it doesn't fit
+        scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+
         GUILayout.Label("交差点から双方向のWayを生成", EditorStyles.boldLabel);
 
         EditorGUILayout.Space();
@@ -497,6 +502,8 @@ public class WayGeneratorWindow : EditorWindow
             CreateTwoWayWays(intersectionA, intersectionB, waysParent, wayPrefab, lanePrefab, laneCount, roadPrefab, roadPrefabBaseLength, attachRoadPrefab, attachIntersectionAsset);
         }
         GUI.enabled = true;
+
+        EditorGUILayout.EndScrollView();
     }
 
     // SceneView 編集系およびルート一括生成は廃止。個別生成のみを提供します。
