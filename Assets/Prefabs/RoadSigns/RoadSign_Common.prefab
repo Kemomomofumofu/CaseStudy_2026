@@ -74,7 +74,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a06d333e7c14d484da7cffee66eadf0b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadSign
-  definition: {fileID: 0}
+  definition: {fileID: 11400000, guid: 39fca00e1cee48228fc41545fd2246aa, type: 2}
   influenceTrigger: {fileID: 6816922382926835729}
 --- !u!1 &7074006407869343281
 GameObject:
