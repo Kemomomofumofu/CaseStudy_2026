@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cb6cb86864199504fb26f2bd70539949, type: 3}
-  m_Name: Def_RandomDirection
+  m_Name: Def_RoadClosed
   m_EditorClassIdentifier: Assembly-CSharp::RoadSignDefinition
-  displayName: Random Direction
+  displayName: Road Closed
   icon: {fileID: 0}
   priority: 0
   effects:
-  - {fileID: 11400000, guid: d9f1b7ad9de24f53a16d9401149566d5, type: 2}
+  - {fileID: 11400000, guid: c7765eff25454214b96e6c4c9f39918f, type: 2}
   signPrefab: {fileID: 4545947971086999065, guid: e653531b1771a3549a7c0095c691da20, type: 3}
