@@ -15,6 +15,7 @@ public enum LaneTurnFlags
     Right = 1 << 2
 }
 
+
 /// <summary>
 /// 二つの交差点から双方向のWayを生成し、LaneとLaneLinkまで自動設定するツール
 /// </summary>
@@ -41,6 +42,9 @@ public class WayGeneratorWindow : EditorWindow
     private RoadNetworkAsset roadNetworkAsset;
     // Scroll position for the editor window UI
     private Vector2 scrollPos = Vector2.zero;
+    // Option to override lane count when generating from a network asset
+    private bool overrideNetworkLaneCount = true;
+    private int overrideNetworkLaneCountValue = 3;
 
     private struct LaneLinkSeed
     {
@@ -105,7 +109,9 @@ public class WayGeneratorWindow : EditorWindow
         GameObject _roadPrefab,
         float _roadPrefabBaseLength,
         bool _attachRoadPrefab,
-        bool _attachIntersectionAsset
+        bool _attachIntersectionAsset,
+        bool _overrideLaneCount,
+        int _overrideLaneCountValue
     )
     {
         if (_network == null)
@@ -124,7 +130,7 @@ public class WayGeneratorWindow : EditorWindow
                 if (target == null || target.intersection == null) continue;
 
                 var dest = target.intersection;
-                int useLaneCount = Mathf.Max(1, target.laneCount);
+                int useLaneCount = _overrideLaneCount ? Mathf.Max(1, _overrideLaneCountValue) : Mathf.Max(1, target.laneCount);
 
                 // build allowed turns flags
                 LaneTurnFlags allowed = LaneTurnFlags.None;
@@ -148,6 +154,24 @@ public class WayGeneratorWindow : EditorWindow
 
         AssetDatabase.SaveAssets();
         Debug.Log($"Road network generation complete: connections={_network.connections.Count}");
+    }
+
+    // Public wrapper so other editor tools can invoke network generation
+    public static void GenerateFromNetworkAsset(
+        RoadNetworkAsset _network,
+        Transform _parent,
+        GameObject _wayPrefab,
+        GameObject _lanePrefab,
+        int _laneCount,
+        GameObject _roadPrefab,
+        float _roadPrefabBaseLength,
+        bool _attachRoadPrefab,
+        bool _attachIntersectionAsset,
+        bool _overrideLaneCount = false,
+        int _overrideLaneCountValue = 1
+    )
+    {
+        CreateRoadNetwork(_network, _parent, _wayPrefab, _lanePrefab, _laneCount, _roadPrefab, _roadPrefabBaseLength, _attachRoadPrefab, _attachIntersectionAsset, _overrideLaneCount, _overrideLaneCountValue);
     }
 
     private void LoadOrCreateRoadRegistry(bool forceCreate = false)
@@ -480,6 +504,16 @@ public class WayGeneratorWindow : EditorWindow
             }
 
             EditorGUILayout.Space();
+
+            // Override lane count options
+            EditorGUILayout.BeginHorizontal();
+            overrideNetworkLaneCount = EditorGUILayout.ToggleLeft("Override lane count for network generation", overrideNetworkLaneCount, GUILayout.Width(260));
+            if (overrideNetworkLaneCount)
+            {
+                overrideNetworkLaneCountValue = EditorGUILayout.IntField("Lane Count", Mathf.Max(1, overrideNetworkLaneCountValue), GUILayout.Width(120));
+            }
+            EditorGUILayout.EndHorizontal();
+
             EditorGUILayout.BeginHorizontal();
             if (GUILayout.Button("Save Network Asset"))
             {
@@ -489,7 +523,7 @@ public class WayGeneratorWindow : EditorWindow
 
             if (GUILayout.Button("Generate Road Network from Asset"))
             {
-                CreateRoadNetwork(roadNetworkAsset, waysParent, wayPrefab, lanePrefab, laneCount, roadPrefab, roadPrefabBaseLength, attachRoadPrefab, attachIntersectionAsset);
+                CreateRoadNetwork(roadNetworkAsset, waysParent, wayPrefab, lanePrefab, laneCount, roadPrefab, roadPrefabBaseLength, attachRoadPrefab, attachIntersectionAsset, overrideNetworkLaneCount, overrideNetworkLaneCountValue);
             }
             EditorGUILayout.EndHorizontal();
         }
