@@ -4,19 +4,48 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "RoadSigns/Definition", fileName = "RoadSignDefinition")]
 public sealed class RoadSignDefinition : ScriptableObject
 {
-    [Header("•\¦İ’è")]
+    [Header("è¡¨ç¤ºè¨­å®š")]
     [SerializeField] private string displayName = "";
     [SerializeField] private Sprite icon = null;
+    [SerializeField] private Texture2D signTexture = null;
 
-    [Header("•]‰¿İ’è")]
+    [Header("åŠ¹æœè¨­å®š")]
     [SerializeField] private int priority = 0;
     [SerializeField] private List<RoadSignEffectAsset> effects = new();
 
-    [Header("”z’uİ’è")]
+    [Header("é…ç½®è¨­å®š")]
     [SerializeField] private RoadSign signPrefab = null;
 
+    private Sprite generatedIcon = null;
+
     public string DisplayName => displayName;
-    public Sprite Icon => icon;
+
+    public Sprite Icon
+    {
+        get
+        {
+            if (icon != null)
+            {
+                return icon;
+            }
+
+            if (signTexture == null)
+            {
+                return null;
+            }
+
+            if (generatedIcon == null)
+            {
+                generatedIcon = Sprite.Create(
+                    signTexture,
+                    new Rect(0, 0, signTexture.width, signTexture.height),
+                    new Vector2(0.5f, 0.5f));
+            }
+
+            return generatedIcon;
+        }
+    }
+
     public int Priority => priority;
     public RoadSign SignPrefab => signPrefab;
     public List<RoadSignEffectAsset> Effects => effects;

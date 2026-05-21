@@ -1,25 +1,28 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public sealed class RoadSignHandView : MonoBehaviour
+public sealed class RoadSignHandView : MonoBehaviour, IScrollHandler, IBeginDragHandler, IDragHandler
 {
     [SerializeField] private RoadSignHandController handController = null;
     [SerializeField] private RoadSignHandViewItem itemPrefab = null;
     [SerializeField] private Transform contentRoot = null;
+    [SerializeField] private RectTransform viewport = null;
+    [SerializeField] private float wheelScrollSpeed = 30f;
 
     private readonly List<RoadSignHandViewItem> items = new();
+    private RectTransform contentRect = null;
 
-    /// <summary>
-    /// 初期生成を行う
-    /// </summary>
     private void Awake()
     {
+        if (contentRoot != null)
+        {
+            contentRect = contentRoot as RectTransform;
+        }
+
         Rebuild();
     }
 
-    /// <summary>
-    /// 変更通知を登録する
-    /// </summary>
     private void OnEnable()
     {
         if (handController != null)
@@ -30,9 +33,6 @@ public sealed class RoadSignHandView : MonoBehaviour
         Refresh();
     }
 
-    /// <summary>
-    /// 変更通知を解除する
-    /// </summary>
     private void OnDisable()
     {
         if (handController != null)
@@ -41,9 +41,26 @@ public sealed class RoadSignHandView : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// UI一覧を再生成する
-    /// </summary>
+    public void OnScroll(PointerEventData _eventData)
+    {
+        ScrollBy(_eventData.scrollDelta.y * wheelScrollSpeed);
+    }
+
+    public void OnBeginDrag(PointerEventData _eventData)
+    {
+        if (contentRect == null)
+        {
+            return;
+        }
+
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(contentRect, _eventData.position, _eventData.pressEventCamera, out _);
+    }
+
+    public void OnDrag(PointerEventData _eventData)
+    {
+        ScrollBy(_eventData.delta.y);
+    }
+
     private void Rebuild()
     {
         ClearItems();
@@ -60,11 +77,10 @@ public sealed class RoadSignHandView : MonoBehaviour
             item.Setup(handController, i, entries[i]);
             items.Add(item);
         }
+
+        ClampContentPosition();
     }
 
-    /// <summary>
-    /// 表示更新を行う
-    /// </summary>
     private void Refresh()
     {
         if (handController == null)
@@ -82,11 +98,45 @@ public sealed class RoadSignHandView : MonoBehaviour
         {
             items[i].UpdateView(handController.Entries[i], handController.SelectedIndex == i);
         }
+
+        ClampContentPosition();
     }
 
-    /// <summary>
-    /// 生成済みアイテムを破棄する
-    /// </summary>
+    private void ScrollBy(float _deltaY)
+    {
+        if (contentRect == null)
+        {
+            return;
+        }
+
+        Vector2 anchored = contentRect.anchoredPosition;
+        anchored.y -= _deltaY;
+        contentRect.anchoredPosition = anchored;
+        ClampContentPosition();
+    }
+
+    private void ClampContentPosition()
+    {
+        if (contentRect == null)
+        {
+            return;
+        }
+
+        RectTransform viewportRect = viewport != null ? viewport : contentRect.parent as RectTransform;
+        if (viewportRect == null)
+        {
+            return;
+        }
+
+        float contentHeight = contentRect.rect.height;
+        float viewportHeight = viewportRect.rect.height;
+        float maxY = Mathf.Max(0f, contentHeight - viewportHeight);
+
+        Vector2 anchored = contentRect.anchoredPosition;
+        anchored.y = Mathf.Clamp(anchored.y, 0f, maxY);
+        contentRect.anchoredPosition = anchored;
+    }
+
     private void ClearItems()
     {
         for (int i = 0; i < items.Count; i++)
