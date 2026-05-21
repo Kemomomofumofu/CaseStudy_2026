@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5ee4158c02e5bcb4f9569cae11b17719, type: 3}
-  m_Name: Eff_ForceDirectionStraight
-  m_EditorClassIdentifier: Assembly-CSharp::ForceDirectionEffectAsset
-  direction: 0
+  m_Script: {fileID: 11500000, guid: bf7f194bcdff0c647a5ed1f1ea1c8fe8, type: 3}
+  m_Name: Eff_BlockDirectionRight
+  m_EditorClassIdentifier: Assembly-CSharp::BlockDirectionEffectAsset
+  blockedDirection: 2

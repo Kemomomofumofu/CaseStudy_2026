@@ -1964,13 +1964,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadSignHandController
   entries:
-  - definition: {fileID: 11400000, guid: 28812e06f8cc33548a6199b3b5ec57cc, type: 2}
+  - definition: {fileID: 11400000, guid: 34de08813f04a6e42a6bb0e7e18fa5bf, type: 2}
     count: 99
-  - definition: {fileID: 11400000, guid: 84b752a4935fdc34caba670696151572, type: 2}
+  - definition: {fileID: 11400000, guid: a504c3d22d0c6624e9801b146a58596c, type: 2}
     count: 99
-  - definition: {fileID: 11400000, guid: 24d7d0153f793474c8610d41be124b1e, type: 2}
+  - definition: {fileID: 11400000, guid: 3dc73fcbbcf75964b85e66623aaed2b0, type: 2}
     count: 99
-  - definition: {fileID: 11400000, guid: 91360d6653183994ca85360ab7d7124f, type: 2}
+  - definition: {fileID: 11400000, guid: 4922bf385842f27418c08a52b3b6da1c, type: 2}
+    count: 99
+  - definition: {fileID: 11400000, guid: f92c1d93e4308344b91b4e366276110e, type: 2}
     count: 99
   selectedIndex: 0
 --- !u!4 &274213265
@@ -13177,6 +13179,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 222881055}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1958619335
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1958619336}
+  m_Layer: 0
+  m_Name: RoadSign
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1958619336
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1958619335}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1967439858
 GameObject:
   m_ObjectHideFlags: 0
@@ -14697,3 +14730,4 @@ SceneRoots:
   - {fileID: 1955825037}
   - {fileID: 1651839036}
   - {fileID: 944723692}
+  - {fileID: 1958619336}
