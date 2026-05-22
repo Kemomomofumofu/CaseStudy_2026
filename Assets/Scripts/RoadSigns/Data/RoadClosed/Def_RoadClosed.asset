@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Def_RoadClosed
   m_EditorClassIdentifier: Assembly-CSharp::RoadSignDefinition
   displayName: Road Closed
-  icon: {fileID: 21300000, guid: c9ab3649cd271d242aaeb2aa4956ddf9, type: 3}
+  icon: {fileID: 21300000, guid: e99a5c2c718e7d84086b3598d0ce87fc, type: 3}
   signTexture: {fileID: 0}
   priority: 0
   effects:
