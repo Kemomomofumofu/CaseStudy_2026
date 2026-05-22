@@ -59,15 +59,6 @@ public class PlayerCamera : MonoBehaviour
     [SerializeField] public float XRotlerpSpeed = 5f;
     [SerializeField] public float XRotlerpSpeedBack = 5f;
     [SerializeField] public float CameraXrotBuffer = 0;
-
-    //車線偏向クールタイム
-    [SerializeField] private float laneShiftCooldown = 1.0f;
-    private float laneShiftTimer = 0.0f;
-
-    //旋回系取得
-    [SerializeField] private TurnDirection currentDirection = TurnDirection.Straight;
-
-
     
     private Vector3 currentLocalOffset;                 // ポジション保持用
     private Vector3 offsetVelocity = Vector3.zero;      // カメラオフセット切り替え用
