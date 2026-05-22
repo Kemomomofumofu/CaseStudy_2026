@@ -50,8 +50,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float aiDecisionInterval = 0.6f;
     [Tooltip("判断ごとのレーン移動確率（0..1）")]
     [SerializeField, Range(0f, 1f)] private float aiLaneShiftChance = 0.08f;
-    [Tooltip("交差点での左右選択確率（0..1） — 0.5 で左右均等")]
-    [SerializeField, Range(0f, 1f)] private float aiTurnBias = 0.5f;
+    //[Tooltip("交差点での左右選択確率（0..1） — 0.5 で左右均等")]
+    //[SerializeField, Range(0f, 1f)] private float aiTurnBias = 0.5f;
 
     [Tooltip("障害物回避の先読み距離（s差）")]
     [SerializeField] private float aiAvoidLookahead = 4.0f;
