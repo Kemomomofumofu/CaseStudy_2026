@@ -15,6 +15,7 @@ public sealed class RoadSignDefinition : ScriptableObject
 
     [Header("配置設定")]
     [SerializeField] private RoadSign signPrefab = null;
+    [SerializeField] private float lifeTime = 10f; // 配置後の寿命（秒）。0以下の場合は無期限
 
     private Sprite generatedIcon = null;
 
@@ -49,4 +50,5 @@ public sealed class RoadSignDefinition : ScriptableObject
     public int Priority => priority;
     public RoadSign SignPrefab => signPrefab;
     public List<RoadSignEffectAsset> Effects => effects;
+    public float LifeTime => lifeTime;
 }
