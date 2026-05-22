@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Def_BlockDirectionBack
   m_EditorClassIdentifier: Assembly-CSharp::RoadSignDefinition
   displayName: No U Turn
-  icon: {fileID: 0}
+  icon: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  signTexture: {fileID: 0}
   priority: 0
   effects:
   - {fileID: 11400000, guid: 3730ab0f198528c4993f97333244bef5, type: 2}
