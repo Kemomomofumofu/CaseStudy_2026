@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Def_RandomDirection
   m_EditorClassIdentifier: Assembly-CSharp::RoadSignDefinition
   displayName: Random Direction
-  icon: {fileID: 0}
+  icon: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  signTexture: {fileID: 0}
   priority: 0
   effects:
   - {fileID: 11400000, guid: d9f1b7ad9de24f53a16d9401149566d5, type: 2}

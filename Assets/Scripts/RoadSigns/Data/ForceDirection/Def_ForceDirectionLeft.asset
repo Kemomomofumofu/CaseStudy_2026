@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Def_ForceDirectionLeft
   m_EditorClassIdentifier: Assembly-CSharp::RoadSignDefinition
   displayName: Go Left
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: c5c4891b0d1751b46847170a24b4f671, type: 3}
+  signTexture: {fileID: 0}
   priority: 0
   effects:
   - {fileID: 11400000, guid: 2c8ab63a9628cef4ab1a4a65d35396c4, type: 2}
