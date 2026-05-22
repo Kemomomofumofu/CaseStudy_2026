@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Def_BlockDirectionRight
   m_EditorClassIdentifier: Assembly-CSharp::RoadSignDefinition
   displayName: No Right Turn
-  icon: {fileID: 21300000, guid: b09580f49f64bf5429f297aee5f6b6fd, type: 3}
+  icon: {fileID: 21300000, guid: 7f955a01518de7c48ab61d8d004e3bc4, type: 3}
   signTexture: {fileID: 0}
   priority: 0
   effects:
