@@ -25,6 +25,14 @@ public class RoadSign : MonoBehaviour
         }
     }
 
+    protected virtual void Start()
+    {
+        if (definition != null && definition.LifeTime > 0f)
+        {
+            Destroy(gameObject, definition.LifeTime);
+        }
+    }
+
     /// <summary>
     /// •W¯‚Ì‰e‹¿”ÍˆÍ‚É“ü‚Á‚½ê‡‚Ìˆ—
     /// </summary>
