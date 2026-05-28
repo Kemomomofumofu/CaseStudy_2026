@@ -904,7 +904,7 @@ PrefabInstance:
     - target: {fileID: 2196450369251709988, guid: 976fc22f62e79514cba1d47f1af723f1, type: 3}
       propertyPath: initialLane
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 406941951}
     - target: {fileID: 2275289931047046108, guid: 976fc22f62e79514cba1d47f1af723f1, type: 3}
       propertyPath: m_IsActive
       value: 0
