@@ -8,20 +8,21 @@ public class GoalTrigger : MonoBehaviour
     // 勝敗確定済みか
     private bool isFinished = false;
 
-    // ★追加：あなたの作った監督を呼ぶための枠
+    // ゲーム全体の進行・UIを管理するCourseManagerへの参照
     [SerializeField] private CourseManager courseManager;
 
     private void OnTriggerEnter(Collider other)
     {
+        // 既に勝敗が決まっているなら処理しない
         if (isFinished) return;
 
-        // Player が先にゴール
-        if (other.CompareTag("Player"))
+        // Player（または PlayerRoot）が先にゴール
+        if (other.CompareTag("Player") || other.CompareTag("PlayerRoot"))
         {
             isFinished = true;
             Debug.Log("===== YOU WIN =====");
 
-            // ★変更：シーン遷移ではなく、監督に「勝ち」を報告する！
+            // CourseManagerに勝利を通知し、リザルトを表示させる
             if (courseManager != null) courseManager.OnPlayerWin();
         }
         // Enemy が先にゴール
@@ -30,7 +31,7 @@ public class GoalTrigger : MonoBehaviour
             isFinished = true;
             Debug.Log("===== YOU LOSE =====");
 
-            // ★変更：シーン遷移ではなく、監督に「負け」を報告する！
+            // CourseManagerに敗北を通知し、リザルトを表示させる
             if (courseManager != null) courseManager.OnPlayerLose();
         }
     }
