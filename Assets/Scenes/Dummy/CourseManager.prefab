@@ -44,5 +44,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b50fde74e31b2594a8284476327da75c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CourseManager
-  resultUI: {fileID: 0}
-  nextStageButton: {fileID: 0}
+  resultUI: {fileID: 2585063592922933620, guid: fc0e1ebcf3de08d42b6df8e9986dde84, type: 3}
+  nextStageButton: {fileID: 2222383921466496768, guid: f8de491a2ce921d499f2136d1078ffdc, type: 3}
+  resultText: {fileID: 0}
