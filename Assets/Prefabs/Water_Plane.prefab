@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &3488234222788074171
+--- !u!1 &8672376192423772276
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,57 +8,47 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8663930117845712939}
-  - component: {fileID: 2020299197182442322}
-  - component: {fileID: 7999311472850077556}
-  - component: {fileID: 5975448329303401980}
-  - component: {fileID: 2611768960153474871}
+  - component: {fileID: 2169618035313719836}
+  - component: {fileID: 1051552453797140004}
+  - component: {fileID: 6477950909237815421}
+  - component: {fileID: 8198031141801909257}
   m_Layer: 0
-  m_Name: Tree
+  m_Name: Water_Plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &8663930117845712939
+--- !u!4 &2169618035313719836
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3488234222788074171}
+  m_GameObject: {fileID: 8672376192423772276}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 6.5, y: 0.5, z: 7.5}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalPosition: {x: 0, y: -0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!193 &2020299197182442322
-Tree:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3488234222788074171}
-  m_SpeedTreeWindAsset: {fileID: 0}
-  m_TreeData: {fileID: 7457112495091642705, guid: ce7bddf28afdfba4da16d3b54f494ca7, type: 3}
---- !u!33 &7999311472850077556
+--- !u!33 &1051552453797140004
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3488234222788074171}
-  m_Mesh: {fileID: 1355034215551046208, guid: ce7bddf28afdfba4da16d3b54f494ca7, type: 3}
---- !u!23 &5975448329303401980
+  m_GameObject: {fileID: 8672376192423772276}
+  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &6477950909237815421
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3488234222788074171}
+  m_GameObject: {fileID: 8672376192423772276}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -77,8 +67,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: cf96f3f69ace3424ba5aecafbd1f35e1, type: 2}
-  - {fileID: -9203092494177288070, guid: ce7bddf28afdfba4da16d3b54f494ca7, type: 3}
+  - {fileID: 2100000, guid: 748aa6b6d9e7f47409c7026f1989428e, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -102,18 +91,18 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &2611768960153474871
+--- !u!114 &8198031141801909257
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3488234222788074171}
+  m_GameObject: {fileID: 8672376192423772276}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae8fd6a6e7ca37645bcb60d365d7d690, type: 3}
+  m_Script: {fileID: 11500000, guid: 77812a6217f99124286718302d420206, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SmoothWiggle
-  positionStrength: {x: 0.2, y: 0.2, z: 0.2}
-  rotationStrength: {x: 2, y: 2, z: 2}
-  speed: 1
+  m_EditorClassIdentifier: Assembly-CSharp::WaterSurfaceWave
+  waveHeight: 0.2
+  waveLength: 0.5
+  waveSpeed: 1
