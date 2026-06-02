@@ -3147,10 +3147,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4471310182563477657, guid: 647434e5d63543a48865311151b77524, type: 3}
-      propertyPath: pauseUI
-      value: 
-      objectReference: {fileID: 626955003}
     - target: {fileID: 6348207364731448487, guid: 647434e5d63543a48865311151b77524, type: 3}
       propertyPath: m_Name
       value: PauseSystem
@@ -3920,11 +3916,6 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 170216366046084020, guid: 7058c90a25fdca345afbf9a0b97ef572, type: 3}
   m_PrefabInstance: {fileID: 1537532449}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &626955003 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5023735907896018969, guid: d08211dcf69834b4ab76b872fb2c31cf, type: 3}
-  m_PrefabInstance: {fileID: 1611481416}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &643917584
 PrefabInstance:
@@ -5394,10 +5385,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 732793576980766824, guid: fc0e1ebcf3de08d42b6df8e9986dde84, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 1120845862705046507, guid: fc0e1ebcf3de08d42b6df8e9986dde84, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -5484,7 +5471,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2585063592922933620, guid: fc0e1ebcf3de08d42b6df8e9986dde84, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -8556,14 +8543,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1778929042659039232, guid: d08211dcf69834b4ab76b872fb2c31cf, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -120
-      objectReference: {fileID: 0}
-    - target: {fileID: 3694398969619676236, guid: d08211dcf69834b4ab76b872fb2c31cf, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -120
-      objectReference: {fileID: 0}
     - target: {fileID: 5023735907896018969, guid: d08211dcf69834b4ab76b872fb2c31cf, type: 3}
       propertyPath: m_Name
       value: PauseUI_Prefab
@@ -8571,10 +8550,6 @@ PrefabInstance:
     - target: {fileID: 5023735907896018969, guid: d08211dcf69834b4ab76b872fb2c31cf, type: 3}
       propertyPath: m_IsActive
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6834355368186041295, guid: d08211dcf69834b4ab76b872fb2c31cf, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -120
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
