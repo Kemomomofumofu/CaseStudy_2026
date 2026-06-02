@@ -858,7 +858,7 @@ MonoBehaviour:
   gridSize: 5
   groundRaycastHeight: 5
   handController: {fileID: 6603011033733415000}
-  gridGizmoExtent: 5
+  gridGizmoExtent: 30
   gridGizmoHeight: 1
   gridGizmoRadius: 0.2
 --- !u!1 &4699966702913149862
