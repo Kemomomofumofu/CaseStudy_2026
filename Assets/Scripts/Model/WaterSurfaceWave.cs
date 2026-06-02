@@ -3,10 +3,12 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter))]
 public class WaterSurfaceWave : MonoBehaviour
 {
-    [Header("y”g‚Ìİ’èz")]
-    public float waveHeight = 0.2f;    // ”g‚Ì‚‚³i‰š“Ê‚Ì‹­‚³j
-    public float waveLength = 0.5f;    // ”g‚Ì×‚©‚³i¬‚³‚¢‚Ù‚Ç‘å”gA‘å‚«‚¢‚Ù‚Ç‚³‚´”gj
-    public float waveSpeed = 1.0f;     // ”g‚Ì“®‚­ƒXƒs[ƒh
+    // ãƒ¡ãƒƒã‚·ãƒ¥ã‚’è¤‡è£½ã—ã€æ³¢ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç”¨ã®é ‚ç‚¹é…åˆ—ã‚’åˆæœŸåŒ–ã™ã‚‹ã€‚
+    // æ¯ãƒ•ãƒ¬ãƒ¼ãƒ é ‚ç‚¹ã‚’æ³¢å½¢ã«åˆã‚ã›ã¦æ›´æ–°ã™ã‚‹ã€‚
+    [Header("ã€æ³¢ã®è¨­å®šã€‘")]
+    public float waveHeight = 0.2f;    // æ³¢ã®é«˜ã•ï¼ˆå‡¹å‡¸ã®å¼·ã•ï¼‰
+    public float waveLength = 0.5f;    // æ³¢ã®ç´°ã‹ã•ï¼ˆå°ã•ã„ã»ã©å¤§æ³¢ã€å¤§ãã„ã»ã©ã•ã–æ³¢ï¼‰
+    public float waveSpeed = 1.0f;     // æ³¢ã®å‹•ãã‚¹ãƒ”ãƒ¼ãƒ‰
 
     private MeshFilter meshFilter;
     private Mesh baseMesh;
@@ -17,12 +19,12 @@ public class WaterSurfaceWave : MonoBehaviour
     {
         meshFilter = GetComponent<MeshFilter>();
 
-        // Œ³‚ÌƒƒbƒVƒ…‚ÌŒ`‚ğ‰ó‚³‚È‚¢‚æ‚¤‚ÉƒNƒ[ƒ“‚ğì‚é
+        // å…ƒã®ãƒ¡ãƒƒã‚·ãƒ¥ã®å½¢ã‚’å£Šã•ãªã„ã‚ˆã†ã«ã‚¯ãƒ­ãƒ¼ãƒ³ã‚’ä½œã‚‹
         baseMesh = meshFilter.sharedMesh;
         Mesh animatedMesh = Instantiate(baseMesh);
         meshFilter.mesh = animatedMesh;
 
-        // ‰Šúó‘Ô‚Ì’¸“_À•W‚ğ‹L‰¯
+        // åˆæœŸçŠ¶æ…‹ã®é ‚ç‚¹åº§æ¨™ã‚’è¨˜æ†¶
         baseVertices = baseMesh.vertices;
         workingVertices = new Vector3[baseVertices.Length];
     }
@@ -31,27 +33,27 @@ public class WaterSurfaceWave : MonoBehaviour
     {
         float timeOffset = Time.time * waveSpeed;
 
-        // ‘S‚Ä‚Ì’¸“_‚ğƒ‹[ƒvˆ—‚µ‚ÄA‚»‚ê‚¼‚ê‚Ì‚‚³‚ğŒvZ‚·‚é
+        // å…¨ã¦ã®é ‚ç‚¹ã‚’ãƒ«ãƒ¼ãƒ—å‡¦ç†ã—ã¦ã€ãã‚Œãã‚Œã®é«˜ã•ã‚’è¨ˆç®—ã™ã‚‹
         for (int i = 0; i < baseVertices.Length; i++)
         {
             Vector3 vertex = baseVertices[i];
 
-            // ¢ŠEÀ•Wi‚Ü‚½‚Íƒ[ƒJƒ‹À•Wj‚ğƒx[ƒX‚Éƒm[ƒh‚ÌˆÊ’u‚ğŒˆ’è
-            // cE‰¡iX‚ÆZj‚ÌˆÊ’u‚É‰‚¶‚½”g‚Ì‚¤‚Ë‚è‚ğì‚é
+            // ä¸–ç•Œåº§æ¨™ï¼ˆã¾ãŸã¯ãƒ­ãƒ¼ã‚«ãƒ«åº§æ¨™ï¼‰ã‚’ãƒ™ãƒ¼ã‚¹ã«ãƒãƒ¼ãƒ‰ã®ä½ç½®ã‚’æ±ºå®š
+            // ç¸¦ãƒ»æ¨ªï¼ˆXã¨Zï¼‰ã®ä½ç½®ã«å¿œã˜ãŸæ³¢ã®ã†ã­ã‚Šã‚’ä½œã‚‹
             float noiseX = (vertex.x + transform.position.x) * waveLength + timeOffset;
             float noiseZ = (vertex.z + transform.position.z) * waveLength + timeOffset;
 
-            // ƒp[ƒŠƒ“ƒmƒCƒY‚ÅŠŠ‚ç‚©‚È‚’á·iY²‚Ì“®‚«j‚ğŒvZ
+            // ãƒ‘ãƒ¼ãƒªãƒ³ãƒã‚¤ã‚ºã§æ»‘ã‚‰ã‹ãªé«˜ä½å·®ï¼ˆYè»¸ã®å‹•ãï¼‰ã‚’è¨ˆç®—
             float y = Mathf.PerlinNoise(noiseX, noiseZ) * waveHeight;
 
-            // ’¸“_‚ÌˆÊ’u‚ğXViŒ³X‚ÌYÀ•W‚Éƒvƒ‰ƒX‚·‚éj
+            // é ‚ç‚¹ã®ä½ç½®ã‚’æ›´æ–°ï¼ˆå…ƒã€…ã®Yåº§æ¨™ã«ãƒ—ãƒ©ã‚¹ã™ã‚‹ï¼‰
             workingVertices[i] = new Vector3(vertex.x, vertex.y + y, vertex.z);
         }
 
-        // “®‚©‚µ‚½’¸“_ƒf[ƒ^‚ğƒƒbƒVƒ…‚É”½‰f
+        // å‹•ã‹ã—ãŸé ‚ç‚¹ãƒ‡ãƒ¼ã‚¿ã‚’ãƒ¡ãƒƒã‚·ãƒ¥ã«åæ˜ 
         meshFilter.mesh.vertices = workingVertices;
 
-        // Œõ‚Ì”½Ëi–@üj‚ğÄŒvZ‚µ‚ÄAŒ©‚½–Ú‚Ì‰š“Ê‚ğŠŠ‚ç‚©‚É‚·‚é
+        // å…‰ã®åå°„ï¼ˆæ³•ç·šï¼‰ã‚’å†è¨ˆç®—ã—ã¦ã€è¦‹ãŸç›®ã®å‡¹å‡¸ã‚’æ»‘ã‚‰ã‹ã«ã™ã‚‹
         meshFilter.mesh.RecalculateNormals();
         meshFilter.mesh.RecalculateBounds();
     }
