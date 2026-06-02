@@ -39,14 +39,22 @@ public class RoadSignReceiver : MonoBehaviour
 
         RemoveDestroyedSigns();
 
+        if (activeSigns.Count == 0)
+        {
+            return evaluation;
+        }
+
         // 優先度順にソート
-        activeSigns.Sort((a, b) => a.Priority.CompareTo(b.Priority));
+        if (activeSigns.Count > 1)
+        {
+            activeSigns.Sort((a, b) => a.Priority.CompareTo(b.Priority));
+        }
 
         // 各標識を評価
-        foreach (var sign in activeSigns)
+        for (int i = 0; i < activeSigns.Count; i++)
         {
             // 標識を評価
-            sign.Evaluate(_context, evaluation);
+            activeSigns[i].Evaluate(_context, evaluation);
         }
 
         return evaluation;

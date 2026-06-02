@@ -407,6 +407,7 @@ MonoBehaviour:
   contentRoot: {fileID: 6834864115001270115}
   viewport: {fileID: 8197541476760570713}
   wheelScrollSpeed: 30
+  placementController: {fileID: 6697283675527504763}
 --- !u!1 &2861546377726640868
 GameObject:
   m_ObjectHideFlags: 0
@@ -852,13 +853,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ee8b0fa3d8488c49855c5c0ae674afd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadSignPlacementController
-  targetCamera: {fileID: 1036115380246248059}
-  placementLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  placementYOffset: 0
   placementForwardSource: {fileID: 7800676597397011019}
+  gridOrigin: {x: 0, y: 0.5, z: 0}
+  gridSize: 5
+  groundRaycastHeight: 5
   handController: {fileID: 6603011033733415000}
+  gridGizmoExtent: 5
+  gridGizmoHeight: 1
+  gridGizmoRadius: 0.2
 --- !u!1 &4699966702913149862
 GameObject:
   m_ObjectHideFlags: 0

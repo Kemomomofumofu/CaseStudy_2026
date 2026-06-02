@@ -17,7 +17,7 @@ public sealed class RoadSignHandController : MonoBehaviour
     /// </summary>
     public void SelectIndex(int _index)
     {
-        if (_index < 0 || _index >= entries.Count) return;
+        if (!IsValidIndex(_index)) return;
 
         selectedIndex = _index;
         Changed?.Invoke();
@@ -48,12 +48,17 @@ public sealed class RoadSignHandController : MonoBehaviour
     {
         _entry = null;
 
-        if (entries.Count == 0 || selectedIndex < 0 || selectedIndex >= entries.Count) return false;
+        if (!IsValidIndex(selectedIndex)) return false;
 
         RoadSignHandEntry entry = entries[selectedIndex];
         if (entry == null || !entry.CanUse) return false;
 
         _entry = entry;
         return true;
+    }
+
+    private bool IsValidIndex(int index)
+    {
+        return index >= 0 && index < entries.Count;
     }
 }

@@ -1,77 +1,127 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
 
+/// <summary>
+/// é“è·¯æ¨™è­˜ã®é…ç½®ã‚’ç®¡ç†ã™ã‚‹ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ©ãƒ¼ã€‚
+/// </summary>
 public sealed class RoadSignPlacementController : MonoBehaviour
 {
-    [Header("”z’uİ’è")]
-    [SerializeField] private Camera targetCamera = null;
-    [SerializeField] private LayerMask placementLayers = ~0;
-    [SerializeField] private float placementYOffset = 0.0f;
+    [Header("é…ç½®è¨­å®š")]
     [SerializeField] private Transform placementForwardSource = null;
+    [SerializeField] private Vector3 gridOrigin = Vector3.zero;
+    [SerializeField] private float gridSize = 1.0f;
+    [SerializeField] private float groundRaycastHeight = 5.0f;
 
-    [Header("èDŠÇ—")]
+    [Header("UIé€£æº")]
     [SerializeField] private RoadSignHandController handController = null;
+        
+    [Header("Gizmos")]
+    [SerializeField] private int gridGizmoExtent = 5;
+    [SerializeField] private float gridGizmoHeight = 0.02f;
+    [SerializeField] private float gridGizmoRadius = 0.05f;
 
-    /// <summary>
-    /// ƒJƒƒ‰–¢w’è‚É MainCamera ‚ğæ“¾‚·‚é
-    /// </summary>
-    private void Awake()
-    {
-        if (targetCamera == null) targetCamera = Camera.main;
-    }
+    public void PlaceSelectedAtForwardGrid()
+    {   
+        if (gridSize <= 0f) return;
+        if (!TryResolveSelectedSign(out RoadSignDefinition definition, out RoadSign signPrefab))
+        {
+            return;
+        }
 
-    /// <summary>
-    /// ƒNƒŠƒbƒNˆÊ’u‚É•W¯‚ğ”z’u‚·‚é
-    /// </summary>  
-    private void Update()
-    {
-        if (Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame) return;
-        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
-        if (targetCamera == null) return;
-
-        Ray ray = targetCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
-        if (!Physics.Raycast(ray, out RaycastHit hit, 200f, placementLayers, QueryTriggerInteraction.Ignore)) return;
-
-        if (!TryResolveSelectedSign(out RoadSignDefinition definition, out RoadSign signPrefab)) return;
-
-        Vector3 position = hit.point + Vector3.up * placementYOffset;   
+        Vector3 basePoint = placementForwardSource != null ? placementForwardSource.position : transform.position;
+        Vector3 snappedPosition = ResolvePlacementPosition(basePoint);
         Quaternion rotation = ResolvePlacementRotation(signPrefab);
-
-        RoadSign instance = Instantiate(signPrefab, position, rotation);
+        RoadSign instance = Instantiate(signPrefab, snappedPosition, rotation);
         instance.SetDefinition(definition);
     }
 
-    /// <summary>
-    /// ”z’u‚·‚é•W¯‚Ì‰ñ“]‚ğŒˆ’è‚·‚é
-    /// </summary>
-    private Quaternion ResolvePlacementRotation(RoadSign _signPrefab)
+    private Vector3 ResolvePlacementPosition(Vector3 hitPoint)
     {
-        if (placementForwardSource == null)
+        Vector3 target = hitPoint;
+
+        if (TryGetForwardDirection(out Vector3 forward))
         {
-            return _signPrefab.transform.rotation;
+            target = placementForwardSource.position + forward.normalized * gridSize;
+            target.y = hitPoint.y;
         }
 
-        Vector3 forward = placementForwardSource.forward;
-        forward.y = 0f;
-        if (forward.sqrMagnitude <= 1e-6f)
+        Vector3 snapped = SnapToGrid(target);
+        snapped.y = ResolveGroundHeight(snapped, hitPoint.y);
+        return snapped;
+    }
+
+    private float ResolveGroundHeight(Vector3 position, float fallbackHeight)
+    {
+        float rayHeight = Mathf.Max(0.1f, groundRaycastHeight);
+        Vector3 origin = position + Vector3.up * rayHeight;
+        if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, rayHeight * 2f, ~0, QueryTriggerInteraction.Ignore))
         {
-            return _signPrefab.transform.rotation;
+            return hit.point.y;
         }
+
+        return fallbackHeight;
+    }
+
+    private Vector3 SnapToGrid(Vector3 worldPosition)
+    {
+        Vector3 offset = worldPosition - gridOrigin;
+        float snappedX = Mathf.Round(offset.x / gridSize) * gridSize + gridOrigin.x;
+        float snappedZ = Mathf.Round(offset.z / gridSize) * gridSize + gridOrigin.z;
+        return new Vector3(snappedX, worldPosition.y, snappedZ);
+    }
+
+    private Quaternion ResolvePlacementRotation(RoadSign signPrefab)
+    {
+        if (signPrefab == null) return Quaternion.identity;
+
+        if (!TryGetForwardDirection(out Vector3 forward)) return signPrefab.transform.rotation;
 
         return Quaternion.LookRotation(forward.normalized, Vector3.up);
     }
 
-    /// <summary>
-    /// ‘I‘ğ’†‚Ì•W¯‚ğæ“¾‚·‚é
-    /// </summary>
-    private bool TryResolveSelectedSign(out RoadSignDefinition _definition, out RoadSign _signPrefab)
+    private bool TryGetForwardDirection(out Vector3 forward)
     {
-        _definition = null;
-        _signPrefab = null;
+        forward = Vector3.zero;
+        if (placementForwardSource == null) return false;
 
-        if (handController == null) return false;
+        forward = placementForwardSource.forward;
+        forward.y = 0f;
+        return forward.sqrMagnitude > 1e-6f;
+    }
 
-        return handController.TryConsumeSelected(out _definition, out _signPrefab);
+    private bool TryResolveSelectedSign(out RoadSignDefinition definition, out RoadSign signPrefab)
+    {
+        definition = null;
+        signPrefab = null;
+
+        if (handController == null)
+        {
+            return false;
+        }
+
+        return handController.TryConsumeSelected(out definition, out signPrefab);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Color prevColor = Gizmos.color;
+
+        if (gridSize > 0f && gridGizmoExtent > 0)
+        {
+            Gizmos.color = Color.cyan;
+            for (int x = -gridGizmoExtent; x <= gridGizmoExtent; x++)
+            {
+                for (int z = -gridGizmoExtent; z <= gridGizmoExtent; z++)
+                {
+                    Vector3 position = new Vector3(
+                        gridOrigin.x + x * gridSize,
+                        gridOrigin.y,
+                        gridOrigin.z + z * gridSize);
+                    Vector3 size = new Vector3(gridGizmoRadius, gridGizmoHeight, gridGizmoRadius);
+                    Gizmos.DrawCube(position, size);
+                }
+            }
+        }
+
+        Gizmos.color = prevColor;
     }
 }
