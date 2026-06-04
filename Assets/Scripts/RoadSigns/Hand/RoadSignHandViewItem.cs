@@ -9,6 +9,7 @@ public sealed class RoadSignHandViewItem : MonoBehaviour
     [SerializeField] private TMP_Text nameLabel = null;
     [SerializeField] private TMP_Text countLabel = null;
     [SerializeField] private GameObject selectionMarker = null;
+    [SerializeField] private RoadSignPlacementController placementController = null;
 
     private RoadSignHandController controller = null;
     private int index = -1;
@@ -28,6 +29,11 @@ public sealed class RoadSignHandViewItem : MonoBehaviour
         }
 
         UpdateView(_entry, controller != null && controller.SelectedIndex == index);
+    }
+
+    public void SetPlacementController(RoadSignPlacementController controller)
+    {
+        placementController = controller;
     }
 
     /// <summary>
@@ -73,5 +79,9 @@ public sealed class RoadSignHandViewItem : MonoBehaviour
         }
 
         controller.SelectIndex(index);
+        if (placementController != null)
+        {
+            placementController.PlaceSelectedAtForwardGrid();
+        }
     }
 }

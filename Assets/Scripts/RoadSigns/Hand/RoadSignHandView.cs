@@ -2,13 +2,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public sealed class RoadSignHandView : MonoBehaviour, IScrollHandler, IBeginDragHandler, IDragHandler
+public sealed class RoadSignHandView : MonoBehaviour, IScrollHandler, IDragHandler
 {
     [SerializeField] private RoadSignHandController handController = null;
     [SerializeField] private RoadSignHandViewItem itemPrefab = null;
     [SerializeField] private Transform contentRoot = null;
     [SerializeField] private RectTransform viewport = null;
     [SerializeField] private float wheelScrollSpeed = 30f;
+    [SerializeField] private RoadSignPlacementController placementController = null;
 
     private readonly List<RoadSignHandViewItem> items = new();
     private RectTransform contentRect = null;
@@ -46,16 +47,6 @@ public sealed class RoadSignHandView : MonoBehaviour, IScrollHandler, IBeginDrag
         ScrollBy(_eventData.scrollDelta.y * wheelScrollSpeed);
     }
 
-    public void OnBeginDrag(PointerEventData _eventData)
-    {
-        if (contentRect == null)
-        {
-            return;
-        }
-
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(contentRect, _eventData.position, _eventData.pressEventCamera, out _);
-    }
-
     public void OnDrag(PointerEventData _eventData)
     {
         ScrollBy(_eventData.delta.y);
@@ -74,6 +65,7 @@ public sealed class RoadSignHandView : MonoBehaviour, IScrollHandler, IBeginDrag
         for (int i = 0; i < entries.Count; i++)
         {
             RoadSignHandViewItem item = Instantiate(itemPrefab, contentRoot);
+            item.SetPlacementController(placementController);
             item.Setup(handController, i, entries[i]);
             items.Add(item);
         }
