@@ -1412,6 +1412,10 @@ PrefabInstance:
       propertyPath: target
       value: 
       objectReference: {fileID: 1321982691}
+    - target: {fileID: 5753885030529298906, guid: 976fc22f62e79514cba1d47f1af723f1, type: 3}
+      propertyPath: m_IgnoreReversedGraphics
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6603011033733415000, guid: 976fc22f62e79514cba1d47f1af723f1, type: 3}
       propertyPath: entries.Array.size
       value: 13
@@ -4846,9 +4850,6 @@ MonoBehaviour:
   rotateSpeed: 8
   obstacleCheckMargin: 0.2
   intersectionDecisionDistance: 0.6
-  obstaclePrefab: {fileID: 8617065076710847314, guid: b7f0ff577dd266f4c9dfae45a9ad0c82, type: 3}
-  obstacleLength: 0
-  obstacleLifetime: 0
   obstacleStopDuration: 0
   isStopping: 0
   pathState:
@@ -4858,8 +4859,6 @@ MonoBehaviour:
   aiDecisionInterval: 0.01
   aiLaneShiftChance: 0
   aiAvoidLookahead: 4
-  aiPlaceObstacleChance: 0.06
-  aiPlaceCooldown: 3
   queuedTurnDirection: 0
   laneShiftCooldown: 1
   signReceiver: {fileID: 0}
