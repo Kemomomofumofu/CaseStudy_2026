@@ -9,12 +9,13 @@ public sealed class RoadSignHandViewItem : MonoBehaviour
     [SerializeField] private TMP_Text nameLabel = null;
     [SerializeField] private TMP_Text countLabel = null;
     [SerializeField] private GameObject selectionMarker = null;
+    [SerializeField] private RoadSignPlacementController placementController = null;
 
     private RoadSignHandController controller = null;
     private int index = -1;
 
     /// <summary>
-    /// UIƒAƒCƒeƒ€‚ğ‰Šú‰»‚·‚é
+    /// UIã‚¢ã‚¤ãƒ†ãƒ ã‚’åˆæœŸåŒ–ã™ã‚‹
     /// </summary>
     public void Setup(RoadSignHandController _controller, int _index, RoadSignHandEntry _entry)
     {
@@ -30,8 +31,13 @@ public sealed class RoadSignHandViewItem : MonoBehaviour
         UpdateView(_entry, controller != null && controller.SelectedIndex == index);
     }
 
+    public void SetPlacementController(RoadSignPlacementController controller)
+    {
+        placementController = controller;
+    }
+
     /// <summary>
-    /// •\¦“à—e‚ğXV‚·‚é
+    /// è¡¨ç¤ºå†…å®¹ã‚’æ›´æ–°ã™ã‚‹
     /// </summary>
     public void UpdateView(RoadSignHandEntry _entry, bool _isSelected)
     {
@@ -63,15 +69,23 @@ public sealed class RoadSignHandViewItem : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒNƒŠƒbƒN‚Å‘I‘ğ‚·‚é
+    /// ã‚¯ãƒªãƒƒã‚¯ã§é¸æŠã™ã‚‹
     /// </summary>
     private void HandleClick()
     {
+
         if (controller == null)
         {
             return;
         }
 
         controller.SelectIndex(index);
+
+        if (placementController == null)
+        {
+            return;
+        }
+
+        placementController.PlaceSelectedAtForwardGrid();
     }
 }

@@ -404,6 +404,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoadSignHandView
   handController: {fileID: 6603011033733415000}
   itemPrefab: {fileID: 8177420956704668167, guid: 16dc913a5907c934fbbaa1117cd2aa8d, type: 3}
+  placementController: {fileID: 0}
   contentRoot: {fileID: 6834864115001270115}
   viewport: {fileID: 8197541476760570713}
   wheelScrollSpeed: 30
@@ -791,9 +792,6 @@ MonoBehaviour:
   rotateSpeed: 8
   obstacleCheckMargin: 0.2
   intersectionDecisionDistance: 0.6
-  obstaclePrefab: {fileID: 8617065076710847314, guid: b7f0ff577dd266f4c9dfae45a9ad0c82, type: 3}
-  obstacleLength: 2
-  obstacleLifetime: 5
   obstacleStopDuration: 1
   isStopping: 0
   pathState:
@@ -803,8 +801,6 @@ MonoBehaviour:
   aiDecisionInterval: 0.1
   aiLaneShiftChance: 0.08
   aiAvoidLookahead: 4
-  aiPlaceObstacleChance: 0.06
-  aiPlaceCooldown: 3
   queuedTurnDirection: 0
   laneShiftCooldown: 1
   signReceiver: {fileID: 5374435262958340588}
@@ -852,13 +848,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ee8b0fa3d8488c49855c5c0ae674afd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadSignPlacementController
-  targetCamera: {fileID: 1036115380246248059}
-  placementLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  placementYOffset: 0
   placementForwardSource: {fileID: 7800676597397011019}
+  gridOrigin: {x: 0, y: 0, z: 0}
+  gridSize: 5
+  groundRaycastHeight: 5
   handController: {fileID: 6603011033733415000}
+  gridGizmoExtent: 50
+  gridGizmoHeight: 0.5
+  gridGizmoRadius: 0.1
 --- !u!1 &4699966702913149862
 GameObject:
   m_ObjectHideFlags: 0

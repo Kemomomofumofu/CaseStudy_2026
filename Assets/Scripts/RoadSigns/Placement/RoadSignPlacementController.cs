@@ -21,18 +21,27 @@ public sealed class RoadSignPlacementController : MonoBehaviour
 
     public void PlaceSelectedAtForwardGrid()
     {   
-        if (gridSize <= 0f) return;
+        if (gridSize <= 0f)
+        {
+            return;
+        }
+
         if (!TryResolveSelectedSign(out RoadSignDefinition definition, out RoadSign signPrefab))
         {
             return;
         }
 
         Vector3 basePoint = placementForwardSource != null ? placementForwardSource.position : transform.position;
+
         Vector3 snappedPosition = ResolvePlacementPosition(basePoint);
+
         Quaternion rotation = ResolvePlacementRotation(signPrefab);
+
         RoadSign instance = Instantiate(signPrefab, snappedPosition, rotation);
         instance.SetDefinition(definition);
-        instance.SetOwner(ResolveOwner());
+
+        GameObject owner = ResolveOwner();
+        instance.SetOwner(owner);
     }
 
     private Vector3 ResolvePlacementPosition(Vector3 hitPoint)
@@ -67,14 +76,21 @@ public sealed class RoadSignPlacementController : MonoBehaviour
         Vector3 offset = worldPosition - gridOrigin;
         float snappedX = Mathf.Round(offset.x / gridSize) * gridSize + gridOrigin.x;
         float snappedZ = Mathf.Round(offset.z / gridSize) * gridSize + gridOrigin.z;
-        return new Vector3(snappedX, worldPosition.y, snappedZ);
+        Vector3 snapped = new Vector3(snappedX, worldPosition.y, snappedZ);
+        return snapped;
     }
 
     private Quaternion ResolvePlacementRotation(RoadSign signPrefab)
     {
-        if (signPrefab == null) return Quaternion.identity;
+        if (signPrefab == null)
+        {
+            return Quaternion.identity;
+        }
 
-        if (!TryGetForwardDirection(out Vector3 forward)) return signPrefab.transform.rotation;
+        if (!TryGetForwardDirection(out Vector3 forward))
+        {
+            return signPrefab.transform.rotation;
+        }
 
         return Quaternion.LookRotation(forward.normalized, Vector3.up);
     }
@@ -102,11 +118,15 @@ public sealed class RoadSignPlacementController : MonoBehaviour
     private bool TryGetForwardDirection(out Vector3 forward)
     {
         forward = Vector3.zero;
-        if (placementForwardSource == null) return false;
+        if (placementForwardSource == null)
+        {
+            return false;
+        }
 
         forward = placementForwardSource.forward;
         forward.y = 0f;
-        return forward.sqrMagnitude > 1e-6f;
+        bool isValid = forward.sqrMagnitude > 1e-6f;
+        return isValid;
     }
 
     private bool TryResolveSelectedSign(out RoadSignDefinition definition, out RoadSign signPrefab)
@@ -119,7 +139,8 @@ public sealed class RoadSignPlacementController : MonoBehaviour
             return false;
         }
 
-        return handController.TryConsumeSelected(out definition, out signPrefab);
+        bool resolved = handController.TryConsumeSelected(out definition, out signPrefab);
+        return resolved;
     }
 
     private void OnDrawGizmosSelected()
