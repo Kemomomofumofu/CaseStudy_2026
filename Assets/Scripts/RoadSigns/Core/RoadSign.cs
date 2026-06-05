@@ -2,19 +2,23 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// •W¯‚Ì‹¤’ÊƒNƒ‰ƒX
+/// æ¨™è­˜ã®å…±é€šã‚¯ãƒ©ã‚¹
 /// </summary>
 public class RoadSign : MonoBehaviour
 {
-    [Header("Šî–{İ’è")]
+    private static int nextPlacementOrder = 0;
+
+    [Header("åŸºæœ¬è¨­å®š")]
     [SerializeField] private RoadSignDefinition definition = null;
     [SerializeField] private Collider influenceTrigger = null;
+    [SerializeField] private GameObject owner = null;
 
     public int Priority => definition != null ? definition.Priority : 0;
-
+    public int PlacementOrder { get; private set; } = 0;
+    public GameObject Owner => owner;
 
     /// <summary>
-    /// ‰Šú‰»
+    /// åˆæœŸåŒ–
     /// </summary>
     protected virtual void Reset()
     {
@@ -23,6 +27,11 @@ public class RoadSign : MonoBehaviour
         {
             influenceTrigger.isTrigger = true;
         }
+    }
+
+    protected virtual void Awake()
+    {
+        PlacementOrder = ++nextPlacementOrder;
     }
 
     protected virtual void Start()
@@ -34,9 +43,9 @@ public class RoadSign : MonoBehaviour
     }
 
     /// <summary>
-    /// •W¯‚Ì‰e‹¿”ÍˆÍ‚É“ü‚Á‚½ê‡‚Ìˆ—
+    /// æ¨™è­˜ã®å½±éŸ¿ç¯„å›²ã«å…¥ã£ãŸå ´åˆã®å‡¦ç†
     /// </summary>
-    /// <param name="_other">‰e‹¿”ÍˆÍ‚É“ü‚Á‚½ƒIƒuƒWƒFƒNƒg‚ÌƒRƒ‰ƒCƒ_[</param>
+    /// <param name="_other">å½±éŸ¿ç¯„å›²ã«å…¥ã£ãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ã‚³ãƒ©ã‚¤ãƒ€ãƒ¼</param>
     protected virtual void OnTriggerEnter(Collider _other)
     {
         if (_other.TryGetComponent(out RoadSignReceiver receiver))
@@ -54,29 +63,35 @@ public class RoadSign : MonoBehaviour
     }
 
     /// <summary>
-    /// •W¯‚ÌŒø‰Ê‚ğ•]‰¿‚·‚é
+    /// æ¨™è­˜ã®åŠ¹æœã‚’è©•ä¾¡ã™ã‚‹
     /// </summary>
     public virtual void Evaluate(RoadSignQueryContext _context, RoadSignEvaluation _evaluation)
     {
         if (definition == null) return;
 
         IReadOnlyList<RoadSignEffectAsset> effects = definition.Effects;
-        if(effects == null) return;
+        if (effects == null) return;
 
         for (int i = 0; i < effects.Count; ++i)
         {
-            var effect = effects[i];
+            RoadSignEffectAsset effect = effects[i];
             if (effect == null) continue;
+            if (!effect.CanApplyTo(_context?.Actor, owner)) continue;
 
             effect.Apply(_context, _evaluation);
         }
     }
 
     /// <summary>
-    /// •W¯‚Ì’è‹`‚ğİ’è‚·‚é
+    /// æ¨™è­˜ã®å®šç¾©ã‚’è¨­å®šã™ã‚‹
     /// </summary>
     public void SetDefinition(RoadSignDefinition _definition)
     {
         definition = _definition;
+    }
+
+    public void SetOwner(GameObject _owner)
+    {
+        owner = _owner;
     }
 }

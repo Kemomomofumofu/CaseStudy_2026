@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -19,6 +19,7 @@ public class RoadSignReceiver : MonoBehaviour
 
         activeSigns.Add(_sign);
     }
+
     /// <summary>
     /// 有効な標識を削除する
     /// </summary>
@@ -44,16 +45,14 @@ public class RoadSignReceiver : MonoBehaviour
             return evaluation;
         }
 
-        // 優先度順にソート
         if (activeSigns.Count > 1)
         {
-            activeSigns.Sort((a, b) => a.Priority.CompareTo(b.Priority));
+            // 同じ優先度なら、後に配置された標識ほど後に評価して効果を優先する。
+            activeSigns.Sort(CompareSignPriority);
         }
 
-        // 各標識を評価
         for (int i = 0; i < activeSigns.Count; i++)
         {
-            // 標識を評価
             activeSigns[i].Evaluate(_context, evaluation);
         }
 
@@ -66,5 +65,16 @@ public class RoadSignReceiver : MonoBehaviour
     private void RemoveDestroyedSigns()
     {
         activeSigns.RemoveAll(sign => sign == null);
+    }
+
+    private int CompareSignPriority(RoadSign a, RoadSign b)
+    {
+        int priorityCompare = a.Priority.CompareTo(b.Priority);
+        if (priorityCompare != 0)
+        {
+            return priorityCompare;
+        }
+
+        return a.PlacementOrder.CompareTo(b.PlacementOrder);
     }
 }
