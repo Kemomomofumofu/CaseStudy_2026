@@ -13,26 +13,37 @@ public sealed class RoadSignHandController : MonoBehaviour
     public int SelectedIndex => selectedIndex;
 
     /// <summary>
-    /// g—p‚·‚éèD‚ğ‘I‘ğ‚·‚é
+    /// ä½¿ç”¨ã™ã‚‹æ‰‹æœ­ã‚’é¸æŠã™ã‚‹
     /// </summary>
     public void SelectIndex(int _index)
     {
-        if (!IsValidIndex(_index)) return;
+
+        if (_index < 0 || _index >= entries.Count)
+        {
+            return;
+        }
 
         selectedIndex = _index;
         Changed?.Invoke();
     }
 
     /// <summary>
-    /// ‘I‘ğ’†‚Ì•W¯‚ğ1–‡Á”ï‚µADefinition‚ÆPrefab‚ğ•Ô‚·
+    /// é¸æŠä¸­ã®æ¨™è­˜ã‚’1æšæ¶ˆè²»ã—ã€Definitionã¨Prefabã‚’è¿”ã™
     /// </summary>
     public bool TryConsumeSelected(out RoadSignDefinition _definition, out RoadSign _signPrefab)
     {
         _definition = null;
         _signPrefab = null;
 
-        if (!TryGetSelected(out RoadSignHandEntry entry)) return false;
-        if (!entry.TryConsume()) return false;
+        if (!TryGetSelected(out RoadSignHandEntry entry))
+        {
+            return false;
+        }
+
+        if (!entry.TryConsume())
+        {
+            return false;
+        }
 
         _definition = entry.Definition;
         _signPrefab = entry.SignPrefab;
@@ -42,23 +53,24 @@ public sealed class RoadSignHandController : MonoBehaviour
     }
 
     /// <summary>
-    /// ‘I‘ğ’†‚ÌèDî•ñ‚ğæ“¾‚·‚é
+    /// é¸æŠä¸­ã®æ‰‹æœ­æƒ…å ±ã‚’å–å¾—ã™ã‚‹
     /// </summary>
     public bool TryGetSelected(out RoadSignHandEntry _entry)
     {
         _entry = null;
 
-        if (!IsValidIndex(selectedIndex)) return false;
+        if (entries.Count == 0 || selectedIndex < 0 || selectedIndex >= entries.Count)
+        {
+            return false;
+        }
 
         RoadSignHandEntry entry = entries[selectedIndex];
-        if (entry == null || !entry.CanUse) return false;
+        if (entry == null || !entry.CanUse)
+        {
+            return false;
+        }
 
         _entry = entry;
         return true;
-    }
-
-    private bool IsValidIndex(int index)
-    {
-        return index >= 0 && index < entries.Count;
     }
 }

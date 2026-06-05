@@ -2,20 +2,25 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public sealed class RoadSignHandView : MonoBehaviour, IScrollHandler, IDragHandler
+public sealed class RoadSignHandView : MonoBehaviour, IScrollHandler, IBeginDragHandler, IDragHandler
 {
     [SerializeField] private RoadSignHandController handController = null;
     [SerializeField] private RoadSignHandViewItem itemPrefab = null;
+    [SerializeField] private RoadSignPlacementController placementController = null;
     [SerializeField] private Transform contentRoot = null;
     [SerializeField] private RectTransform viewport = null;
     [SerializeField] private float wheelScrollSpeed = 30f;
-    [SerializeField] private RoadSignPlacementController placementController = null;
 
     private readonly List<RoadSignHandViewItem> items = new();
     private RectTransform contentRect = null;
 
     private void Awake()
     {
+        if (placementController == null)
+        {
+            placementController = ResolvePlacementController();
+        }
+
         if (contentRoot != null)
         {
             contentRect = contentRoot as RectTransform;
@@ -45,6 +50,16 @@ public sealed class RoadSignHandView : MonoBehaviour, IScrollHandler, IDragHandl
     public void OnScroll(PointerEventData _eventData)
     {
         ScrollBy(_eventData.scrollDelta.y * wheelScrollSpeed);
+    }
+
+    public void OnBeginDrag(PointerEventData _eventData)
+    {
+        if (contentRect == null)
+        {
+            return;
+        }
+
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(contentRect, _eventData.position, _eventData.pressEventCamera, out _);
     }
 
     public void OnDrag(PointerEventData _eventData)
@@ -140,5 +155,20 @@ public sealed class RoadSignHandView : MonoBehaviour, IScrollHandler, IDragHandl
         }
 
         items.Clear();
+    }
+
+    private RoadSignPlacementController ResolvePlacementController()
+    {
+        PlayerController owner = GetComponentInParent<PlayerController>();
+        if (owner != null)
+        {
+            RoadSignPlacementController childController = owner.GetComponentInChildren<RoadSignPlacementController>(true);
+            if (childController != null)
+            {
+                return childController;
+            }
+        }
+
+        return FindFirstObjectByType<RoadSignPlacementController>();
     }
 }

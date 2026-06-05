@@ -15,7 +15,7 @@ public sealed class RoadSignHandViewItem : MonoBehaviour
     private int index = -1;
 
     /// <summary>
-    /// UIƒAƒCƒeƒ€‚ğ‰Šú‰»‚·‚é
+    /// UIã‚¢ã‚¤ãƒ†ãƒ ã‚’åˆæœŸåŒ–ã™ã‚‹
     /// </summary>
     public void Setup(RoadSignHandController _controller, int _index, RoadSignHandEntry _entry)
     {
@@ -37,7 +37,7 @@ public sealed class RoadSignHandViewItem : MonoBehaviour
     }
 
     /// <summary>
-    /// •\¦“à—e‚ğXV‚·‚é
+    /// è¡¨ç¤ºå†…å®¹ã‚’æ›´æ–°ã™ã‚‹
     /// </summary>
     public void UpdateView(RoadSignHandEntry _entry, bool _isSelected)
     {
@@ -69,19 +69,23 @@ public sealed class RoadSignHandViewItem : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒNƒŠƒbƒN‚Å‘I‘ğ‚·‚é
+    /// ã‚¯ãƒªãƒƒã‚¯ã§é¸æŠã™ã‚‹
     /// </summary>
     private void HandleClick()
     {
+
         if (controller == null)
         {
             return;
         }
 
         controller.SelectIndex(index);
-        if (placementController != null)
+
+        if (placementController == null)
         {
-            placementController.PlaceSelectedAtForwardGrid();
+            return;
         }
+
+        placementController.PlaceSelectedAtForwardGrid();
     }
 }
