@@ -27,12 +27,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float intersectionDecisionDistance = 0.6f;
 
     [Header("障害物設定")]
-    [Tooltip("生成する障害物Prefab")]
-    [SerializeField] private LaneObstacle obstaclePrefab;
-    [Tooltip("障害物の長さ")]
-    [SerializeField] private float obstacleLength = 2.0f;
-    [Tooltip("障害物が消えるまでの時間")]
-    [SerializeField] private float obstacleLifetime = 5.0f;
     [Tooltip("障害物に衝突した際の停止時間")]
     [SerializeField] private float obstacleStopDuration = 1.0f;
     public bool isStopping = false; // 停止中か
@@ -56,13 +50,7 @@ public class PlayerController : MonoBehaviour
     [Tooltip("障害物回避の先読み距離（s差）")]
     [SerializeField] private float aiAvoidLookahead = 4.0f;
 
-    [Tooltip("AIが障害物を置く確率（判断ごと）")]
-    [SerializeField, Range(0f, 1f)] private float aiPlaceObstacleChance = 0.06f;
-    [Tooltip("AIが障害物を置く際のクールダウン（秒）")]
-    [SerializeField] private float aiPlaceCooldown = 3.0f;
-
     private float aiDecisionTimer = 0.0f;
-    private float aiPlaceTimer = 0.0f;
 
     public TurnDirection queuedTurnDirection = TurnDirection.Straight;
     public TurnDirection QueuedTurnDirection => queuedTurnDirection;
@@ -101,13 +89,6 @@ public class PlayerController : MonoBehaviour
     {
         UpdateStopTimer();
         UpdateLaneShiftTimer();
-
-        // AI 用クールダウンを毎フレーム更新
-        if (aiPlaceTimer > 0f)
-        {
-            aiPlaceTimer -= Time.deltaTime;
-            if (aiPlaceTimer < 0f) aiPlaceTimer = 0f;
-        }
 
         UpdateInput();
         UpdateQueuedTurnDirectionBySign();
@@ -179,12 +160,6 @@ public class PlayerController : MonoBehaviour
         {
             TryShiftLane(-1);
         }
-
-        // 障害物生成
-        if (keyboard.spaceKey.wasPressedThisFrame)
-        {
-            TrySpawnObstacleAtLaneEnd();
-        }
     }
 
     /// <summary>
@@ -216,7 +191,6 @@ public class PlayerController : MonoBehaviour
     /// 簡易 AI 判断処理
     /// - 定期的にレーン移動や交差点での進行方向を決定する
     /// - 障害物を先読みして回避を試みる
-    /// - 確率に応じて障害物を生成する（クールダウンあり）
     /// </summary>
     private void UpdateAI()
     {
@@ -281,12 +255,6 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // --- 障害物生成（確率 + クールダウン） ---
-        if (obstaclePrefab != null && aiPlaceTimer <= 0f && UnityEngine.Random.value < aiPlaceObstacleChance)
-        {
-            TrySpawnObstacleAtLaneEnd();
-            aiPlaceTimer = aiPlaceCooldown;
-        }
     }
 
     /// <summary>
@@ -383,7 +351,6 @@ public class PlayerController : MonoBehaviour
         pathState.Reset(initialLane, initialS);
         queuedTurnDirection = TurnDirection.Straight;
         aiDecisionTimer = 0f;
-        aiPlaceTimer = 0f;
         laneShiftTimer = 0f;
     }
 
@@ -455,62 +422,6 @@ public class PlayerController : MonoBehaviour
         Debug.Log(message);
         ResetToInitialState();
         SyncTransformToLane();
-    }
-
-    /// <summary>
-    /// 現在のLane終端位置に障害物を生成する
-    /// </summary>
-    private void TrySpawnObstacleAtLaneEnd()
-    {
-        Lane currentLane = pathState.CurrentLane;
-        if (currentLane == null)
-        {
-            return;
-        }
-
-        if (obstaclePrefab == null)
-        {
-            Debug.Log("障害物Prefabが設定されていない。");
-            return;
-        }
-
-        float laneLength = currentLane.Length;
-        if (laneLength <= 0.0f)
-        {
-            Debug.Log("Laneの長さが不正なため障害物を生成できない。");
-            return;
-        }
-
-        float clampedObstacleLength = Mathf.Max(0.1f, obstacleLength);
-
-        // 現在のLane終端にぴったり収まる区間を作る
-        float sEnd = laneLength;
-        float sStart = Mathf.Max(0.0f, sEnd - clampedObstacleLength);
-
-        // 既に同じ場所に障害物がある場合は生成しない
-        if (currentLane.HasObstacleInRange(sStart, sEnd))
-        {
-            Debug.Log("Lane終端に既存障害物があるため生成しない。");
-            return;
-        }
-
-        SpawnObstacle(currentLane, sStart, sEnd);
-    }
-
-    /// <summary>
-    /// 障害物を生成してLaneへ登録する
-    /// </summary>
-    /// <param name="_lane">配置先Lane</param>
-    /// <param name="_sStart">占有開始s位置</param>
-    /// <param name="_sEnd">占有終了s位置</param>
-    private void SpawnObstacle(Lane _lane, float _sStart, float _sEnd)
-    {
-        LaneObstacle obstacle = Instantiate(obstaclePrefab);
-        obstacle.Setup(_lane, _sStart, _sEnd);
-        _lane.AddObstacle(obstacle);
-        obstacle.SyncVisual();
-
-        Destroy(obstacle.gameObject, obstacleLifetime);
     }
 
     /// <summary>
