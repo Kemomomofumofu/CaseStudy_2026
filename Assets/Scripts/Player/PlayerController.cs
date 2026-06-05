@@ -22,16 +22,14 @@ public class PlayerController : MonoBehaviour
     [Tooltip("判定")]
     [SerializeField] private float obstacleCheckMargin = 0.2f;
 
+    [Header("交差点設定")]
+    [Tooltip("交差点で進行方向を決める距離（Lane終端からの距離）")]
+    [SerializeField] private float intersectionDecisionDistance = 0.6f;
+
     [Header("障害物設定")]
-    [Tooltip("生成する障害物Prefab")]
-    [SerializeField] private LaneObstacle obstaclePrefab;
-    [Tooltip("障害物の長さ")]
-    [SerializeField] private float obstacleLength = 2.0f;
-    [Tooltip("障害物が消えるまでの時間")]
-    [SerializeField] private float obstacleLifetime = 5.0f;
     [Tooltip("障害物に衝突した際の停止時間")]
     [SerializeField] private float obstacleStopDuration = 1.0f;
-    private bool isStopping = false; // 停止中か
+    public bool isStopping = false; // 停止中か
     private float stopTimer = 0.0f; // 停止時間のタイマー
 
     [Tooltip("状態")]
@@ -46,27 +44,37 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float aiDecisionInterval = 0.6f;
     [Tooltip("判断ごとのレーン移動確率（0..1）")]
     [SerializeField, Range(0f, 1f)] private float aiLaneShiftChance = 0.08f;
-    [Tooltip("交差点での左右選択確率（0..1） — 0.5 で左右均等")]
-    [SerializeField, Range(0f, 1f)] private float aiTurnBias = 0.5f;
+    //[Tooltip("交差点での左右選択確率（0..1） — 0.5 で左右均等")]
+    //[SerializeField, Range(0f, 1f)] private float aiTurnBias = 0.5f;
 
     [Tooltip("障害物回避の先読み距離（s差）")]
     [SerializeField] private float aiAvoidLookahead = 4.0f;
 
-    [Tooltip("AIが障害物を置く確率（判断ごと）")]
-    [SerializeField, Range(0f, 1f)] private float aiPlaceObstacleChance = 0.06f;
-    [Tooltip("AIが障害物を置く際のクールダウン（秒）")]
-    [SerializeField] private float aiPlaceCooldown = 3.0f;
-
     private float aiDecisionTimer = 0.0f;
-    private float aiPlaceTimer = 0.0f;
 
-    private TurnDirection queuedTurnDirection = TurnDirection.Straight;
+    public TurnDirection queuedTurnDirection = TurnDirection.Straight;
     public TurnDirection QueuedTurnDirection => queuedTurnDirection;
 
     [Tooltip("車線変更のクールタイム（秒）")]
     [SerializeField] private float laneShiftCooldown = 1.0f;
 
     private float laneShiftTimer = 0.0f;
+
+    // --- 標識関連 ---
+    [Header("標識関連")]
+    [Tooltip("標識の受信コンポーネント")]
+    [SerializeField] private RoadSignReceiver signReceiver = null;
+
+    private readonly PlayerSignResolver signResolver = new(); // 標識解決用
+
+    private void Awake()
+    {
+        if (signReceiver == null)
+        {
+            signReceiver = GetComponent<RoadSignReceiver>();
+        }
+    }
+
 
     private void Start()
     {
@@ -82,14 +90,8 @@ public class PlayerController : MonoBehaviour
         UpdateStopTimer();
         UpdateLaneShiftTimer();
 
-        // AI 用クールダウンを毎フレーム更新
-        if (aiPlaceTimer > 0f)
-        {
-            aiPlaceTimer -= Time.deltaTime;
-            if (aiPlaceTimer < 0f) aiPlaceTimer = 0f;
-        }
-
         UpdateInput();
+        UpdateQueuedTurnDirectionBySign();
         UpdateMovement();
         SyncTransformToLane();
     }
@@ -99,13 +101,13 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void UpdateStopTimer()
     {
-        if(!isStopping)
+        if (!isStopping)
         {
             return;
         }
 
         stopTimer -= Time.deltaTime;
-        if(stopTimer <= 0.0f)
+        if (stopTimer <= 0.0f)
         {
             stopTimer = 0.0f;
             isStopping = false;
@@ -132,7 +134,7 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateInput()
     {
-        if(isStopping)
+        if (isStopping)
         {
             return;
         }
@@ -149,24 +151,6 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // 交差点での進行方向予約
-        if (keyboard.wKey.wasPressedThisFrame)
-        {
-            queuedTurnDirection = TurnDirection.Straight;
-        }
-        else if (keyboard.aKey.wasPressedThisFrame)
-        {
-            queuedTurnDirection = TurnDirection.Left;
-        }
-        else if (keyboard.dKey.wasPressedThisFrame)
-        {
-            queuedTurnDirection = TurnDirection.Right;
-        }
-        else if (keyboard.sKey.wasPressedThisFrame)
-        {
-            queuedTurnDirection = TurnDirection.Back;
-        }
-
         // レーン変更
         if (keyboard.leftArrowKey.wasPressedThisFrame)
         {
@@ -176,19 +160,37 @@ public class PlayerController : MonoBehaviour
         {
             TryShiftLane(-1);
         }
+    }
 
-        // 障害物生成
-        if (keyboard.spaceKey.wasPressedThisFrame)
+    /// <summary>
+    /// 交差点手前で標識を参照して進行方向を予約
+    /// </summary>
+    private void UpdateQueuedTurnDirectionBySign()
+    {
+        Lane currentLane = pathState.CurrentLane;
+        if (currentLane == null)
         {
-            TrySpawnObstacleAtLaneEnd();
+            return;
         }
+
+        float laneLength = currentLane.Length;
+        if (laneLength <= 0f)
+        {
+            return;
+        }
+
+        if (pathState.CurrentS < laneLength - intersectionDecisionDistance)
+        {
+            return;
+        }
+
+        queuedTurnDirection = ResolveTurnDirectionBySign();
     }
 
     /// <summary>
     /// 簡易 AI 判断処理
     /// - 定期的にレーン移動や交差点での進行方向を決定する
     /// - 障害物を先読みして回避を試みる
-    /// - 確率に応じて障害物を生成する（クールダウンあり）
     /// </summary>
     private void UpdateAI()
     {
@@ -245,40 +247,6 @@ public class PlayerController : MonoBehaviour
             // どちらも回避できない場合はそのまま（衝突処理は移動処理側で行う）
         }
 
-        // --- 交差点での進行方向予約（既存挙動） ---
-        float laneLength = currentLane.Length;
-        if (laneLength > 0f && pathState.CurrentS >= laneLength - 0.6f)
-        {
-            var options = new System.Collections.Generic.List<TurnDirection>();
-            if (currentLane.GetNextLane(TurnDirection.Straight) != null) options.Add(TurnDirection.Straight);
-            if (currentLane.GetNextLane(TurnDirection.Left) != null) options.Add(TurnDirection.Left);
-            if (currentLane.GetNextLane(TurnDirection.Right) != null) options.Add(TurnDirection.Right);
-            if (options.Count == 0)
-            {
-                queuedTurnDirection = TurnDirection.Straight;
-            }
-            else
-            {
-                float r = UnityEngine.Random.value;
-                if (options.Contains(TurnDirection.Straight) && r < aiTurnBias)
-                {
-                    queuedTurnDirection = TurnDirection.Straight;
-                }
-                else
-                {
-                    var sideOptions = options.FindAll(t => t == TurnDirection.Left || t == TurnDirection.Right);
-                    if (sideOptions.Count > 0)
-                    {
-                        queuedTurnDirection = sideOptions[UnityEngine.Random.Range(0, sideOptions.Count)];
-                    }
-                    else
-                    {
-                        queuedTurnDirection = TurnDirection.Straight;
-                    }
-                }
-            }
-        }
-
         // --- 時々レーン変更（雑な確率） ---
         if (UnityEngine.Random.value < aiLaneShiftChance)
         {
@@ -287,12 +255,6 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // --- 障害物生成（確率 + クールダウン） ---
-        if (obstaclePrefab != null && aiPlaceTimer <= 0f && UnityEngine.Random.value < aiPlaceObstacleChance)
-        {
-            TrySpawnObstacleAtLaneEnd();
-            aiPlaceTimer = aiPlaceCooldown;
-        }
     }
 
     /// <summary>
@@ -330,7 +292,7 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void UpdateMovement()
     {
-        if(isStopping)
+        if (isStopping)
         {
             return;
         }
@@ -341,7 +303,10 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        float nextS = pathState.CurrentS + moveSpeed * Time.deltaTime;
+        // 標識による速度制限を考慮
+        float currentMoveSpeed = ResolveMoveSpeedBySign();
+
+        float nextS = pathState.CurrentS + currentMoveSpeed * Time.deltaTime;
 
         // 障害物チェック
         LaneObstacle hitObstacle;
@@ -358,16 +323,19 @@ public class PlayerController : MonoBehaviour
             float remain = nextS - laneLength;
             Lane nextLane = currentLane.GetNextLane(queuedTurnDirection);
 
-            // 次のレーンがない場合
-            if (nextLane == null)
+            // 次のレーンがない場合 or 標識で進行禁止の場合
+            if (nextLane == null || !CanMoveBySign(queuedTurnDirection))
             {
-                OnInvalidTurn();
+                // 現在のレーンの終端で止まる
+                pathState.CurrentS = Mathf.Min(pathState.CurrentS, laneLength);
                 return;
             }
 
+            // 次のレーンへ移動
             pathState.CurrentLane = nextLane;
             pathState.CurrentS = remain;
             queuedTurnDirection = TurnDirection.Straight;
+
             return;
         }
 
@@ -383,7 +351,6 @@ public class PlayerController : MonoBehaviour
         pathState.Reset(initialLane, initialS);
         queuedTurnDirection = TurnDirection.Straight;
         aiDecisionTimer = 0f;
-        aiPlaceTimer = 0f;
         laneShiftTimer = 0f;
     }
 
@@ -433,6 +400,8 @@ public class PlayerController : MonoBehaviour
         pathState.CurrentS = Mathf.Max(0.0f, pathState.CurrentS - 1.0f); // ぶつかり続けないように少し後退
         SyncTransformToLane();
 
+
+
         Debug.Log("障害物に衝突");
     }
 
@@ -456,62 +425,6 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// 現在のLane終端位置に障害物を生成する
-    /// </summary>
-    private void TrySpawnObstacleAtLaneEnd()
-    {
-        Lane currentLane = pathState.CurrentLane;
-        if (currentLane == null)
-        {
-            return;
-        }
-
-        if (obstaclePrefab == null)
-        {
-            Debug.Log("障害物Prefabが設定されていない。");
-            return;
-        }
-
-        float laneLength = currentLane.Length;
-        if (laneLength <= 0.0f)
-        {
-            Debug.Log("Laneの長さが不正なため障害物を生成できない。");
-            return;
-        }
-
-        float clampedObstacleLength = Mathf.Max(0.1f, obstacleLength);
-
-        // 現在のLane終端にぴったり収まる区間を作る
-        float sEnd = laneLength;
-        float sStart = Mathf.Max(0.0f, sEnd - clampedObstacleLength);
-
-        // 既に同じ場所に障害物がある場合は生成しない
-        if (currentLane.HasObstacleInRange(sStart, sEnd))
-        {
-            Debug.Log("Lane終端に既存障害物があるため生成しない。");
-            return;
-        }
-
-        SpawnObstacle(currentLane, sStart, sEnd);
-    }
-
-    /// <summary>
-    /// 障害物を生成してLaneへ登録する
-    /// </summary>
-    /// <param name="_lane">配置先Lane</param>
-    /// <param name="_sStart">占有開始s位置</param>
-    /// <param name="_sEnd">占有終了s位置</param>
-    private void SpawnObstacle(Lane _lane, float _sStart, float _sEnd)
-    {
-        LaneObstacle obstacle = Instantiate(obstaclePrefab);
-        obstacle.Setup(_lane, _sStart, _sEnd);
-        _lane.AddObstacle(obstacle);
-        obstacle.SyncVisual();
-
-        Destroy(obstacle.gameObject, obstacleLifetime);
-    }
-
-    /// <summary>
     /// 外部から CPU を切り替える（Inspector の切り替えでも有効）
     /// </summary>
     public void SetIsCPU(bool cpu)
@@ -519,4 +432,71 @@ public class PlayerController : MonoBehaviour
         isCPU = cpu;
         aiDecisionTimer = 0f;
     }
+
+
+    #region --- 標識関連 ---
+    /// <summary>
+    /// 標識の評価を行う
+    /// </summary>
+    private RoadSignEvaluation EvaluateSigns(TurnDirection _intendedDirection)
+    {
+        var context = new RoadSignQueryContext
+        {
+            Actor = this.gameObject,
+            WorldPosition = transform.position,
+            IntendedDirection = _intendedDirection,
+            CurrentSpeed = moveSpeed
+        };
+
+        if (signReceiver == null) return new RoadSignEvaluation();
+
+        return signReceiver.Evaluate(context);
+    }
+
+    /// <summary>
+    /// 標識を考慮した移動速度を返す
+    /// </summary>
+    private float ResolveMoveSpeedBySign()
+    {
+        RoadSignEvaluation evaluation = EvaluateSigns(queuedTurnDirection);
+        return signResolver.ResolveMoveSpeed(evaluation, moveSpeed);
+    }
+
+    /// <summary>
+    /// 標識を考慮して指定方向に進めるか判定する
+    /// </summary>
+    private bool CanMoveBySign(TurnDirection _direction)
+    {
+        if (signReceiver == null)
+        {
+            return true;
+        }
+        RoadSignEvaluation evaluation = EvaluateSigns(_direction);
+        return signResolver.CanMove(evaluation, _direction);
+    }
+
+    /// <summary>
+    /// 標識を考慮して進行方向を決定する
+    /// </summary>
+
+    private TurnDirection ResolveTurnDirectionBySign()
+    {
+        RoadSignEvaluation evaluation = EvaluateSigns(queuedTurnDirection);
+        return signResolver.ResolveTurnDirection(evaluation, queuedTurnDirection);
+    }
+
+    /// <summary>
+    /// 標識を考慮して進行方向を決定する
+    /// </summary>
+
+    private void ApplyStopBySign()
+    {
+        RoadSignEvaluation evaluation = EvaluateSigns(queuedTurnDirection);
+
+        if (!signResolver.RequiresStop(evaluation)) return;
+
+        isStopping = true;
+        stopTimer = obstacleStopDuration;
+    }
+    #endregion --- 標識関連 ---
 }

@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+<<<<<<< Updated upstream
+guid: 87401387eda6b2143a202009c01bad3b
+folderAsset: yes
+=======
+<<<<<<<< Updated upstream:Assets/Scenes/Stage3.unity.meta
+guid: 50659c72af7e4094cb4e134525aeb47a
+========
+guid: 14e54da3c375958468b120549c9d30e7
+folderAsset: yes
+>>>>>>>> Stashed changes:Assets/Prefabs/RoadSigns/Materials.meta
+>>>>>>> Stashed changes
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
