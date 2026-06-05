@@ -16,6 +16,7 @@ MonoBehaviour:
   - from: {fileID: 0}
     to:
     - intersection: {fileID: 0}
+<<<<<<< Updated upstream
       directionType: 1
       laneCount: 3
       allowLeftTurn: 1
@@ -28,6 +29,8 @@ MonoBehaviour:
       allowRightTurn: 1
       allowStraight: 1
     - intersection: {fileID: 0}
+=======
+>>>>>>> Stashed changes
       directionType: 1
       laneCount: 3
       allowLeftTurn: 1
@@ -75,6 +78,7 @@ MonoBehaviour:
       allowLeftTurn: 1
       allowRightTurn: 1
       allowStraight: 1
+<<<<<<< Updated upstream
   - from: {fileID: 0}
     to:
     - intersection: {fileID: 0}
@@ -83,34 +87,6 @@ MonoBehaviour:
       allowLeftTurn: 1
       allowRightTurn: 1
       allowStraight: 1
-    - intersection: {fileID: 0}
-      directionType: 1
-      laneCount: 3
-      allowLeftTurn: 1
-      allowRightTurn: 1
-      allowStraight: 1
-    - intersection: {fileID: 0}
-      directionType: 1
-      laneCount: 3
-      allowLeftTurn: 1
-      allowRightTurn: 1
-      allowStraight: 1
-  - from: {fileID: 0}
-    to:
-    - intersection: {fileID: 0}
-      directionType: 1
-      laneCount: 3
-      allowLeftTurn: 1
-      allowRightTurn: 1
-      allowStraight: 1
-    - intersection: {fileID: 0}
-      directionType: 1
-      laneCount: 3
-      allowLeftTurn: 1
-      allowRightTurn: 1
-      allowStraight: 1
-  - from: {fileID: 0}
-    to:
     - intersection: {fileID: 0}
       directionType: 1
       laneCount: 3
@@ -159,8 +135,6 @@ MonoBehaviour:
       allowLeftTurn: 1
       allowRightTurn: 1
       allowStraight: 1
-  - from: {fileID: 0}
-    to:
     - intersection: {fileID: 0}
       directionType: 1
       laneCount: 3
@@ -197,3 +171,35 @@ MonoBehaviour:
       allowLeftTurn: 1
       allowRightTurn: 1
       allowStraight: 1
+  - from: {fileID: 0}
+    to:
+    - intersection: {fileID: 0}
+      directionType: 1
+      laneCount: 3
+      allowLeftTurn: 1
+      allowRightTurn: 1
+      allowStraight: 1
+    - intersection: {fileID: 0}
+      directionType: 1
+      laneCount: 3
+      allowLeftTurn: 1
+      allowRightTurn: 1
+      allowStraight: 1
+  - from: {fileID: 0}
+    to:
+    - intersection: {fileID: 0}
+      directionType: 1
+      laneCount: 3
+      allowLeftTurn: 1
+      allowRightTurn: 1
+      allowStraight: 1
+  - from: {fileID: 0}
+    to:
+    - intersection: {fileID: 0}
+      directionType: 1
+      laneCount: 3
+      allowLeftTurn: 1
+      allowRightTurn: 1
+      allowStraight: 1
+=======
+>>>>>>> Stashed changes
