@@ -10429,6 +10429,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8068703260279824663, guid: 976fc22f62e79514cba1d47f1af723f1, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 4063187456420582864, guid: 976fc22f62e79514cba1d47f1af723f1, type: 3}
@@ -13548,6 +13552,14 @@ PrefabInstance:
     - target: {fileID: 4489111264671963074, guid: 976fc22f62e79514cba1d47f1af723f1, type: 3}
       propertyPath: m_Name
       value: PlayerRoot
+      objectReference: {fileID: 0}
+    - target: {fileID: 6697283675527504763, guid: 976fc22f62e79514cba1d47f1af723f1, type: 3}
+      propertyPath: gridGizmoExtent
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 6697283675527504763, guid: 976fc22f62e79514cba1d47f1af723f1, type: 3}
+      propertyPath: gridGizmoRadius
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 7800676597397011019, guid: 976fc22f62e79514cba1d47f1af723f1, type: 3}
       propertyPath: m_LocalPosition.x

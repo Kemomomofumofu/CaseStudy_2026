@@ -6,6 +6,7 @@ public sealed class RoadSignHandView : MonoBehaviour, IScrollHandler, IBeginDrag
 {
     [SerializeField] private RoadSignHandController handController = null;
     [SerializeField] private RoadSignHandViewItem itemPrefab = null;
+    [SerializeField] private RoadSignPlacementController placementController = null;
     [SerializeField] private Transform contentRoot = null;
     [SerializeField] private RectTransform viewport = null;
     [SerializeField] private float wheelScrollSpeed = 30f;
@@ -15,6 +16,11 @@ public sealed class RoadSignHandView : MonoBehaviour, IScrollHandler, IBeginDrag
 
     private void Awake()
     {
+        if (placementController == null)
+        {
+            placementController = ResolvePlacementController();
+        }
+
         if (contentRoot != null)
         {
             contentRect = contentRoot as RectTransform;
@@ -74,6 +80,7 @@ public sealed class RoadSignHandView : MonoBehaviour, IScrollHandler, IBeginDrag
         for (int i = 0; i < entries.Count; i++)
         {
             RoadSignHandViewItem item = Instantiate(itemPrefab, contentRoot);
+            item.SetPlacementController(placementController);
             item.Setup(handController, i, entries[i]);
             items.Add(item);
         }
@@ -148,5 +155,20 @@ public sealed class RoadSignHandView : MonoBehaviour, IScrollHandler, IBeginDrag
         }
 
         items.Clear();
+    }
+
+    private RoadSignPlacementController ResolvePlacementController()
+    {
+        PlayerController owner = GetComponentInParent<PlayerController>();
+        if (owner != null)
+        {
+            RoadSignPlacementController childController = owner.GetComponentInChildren<RoadSignPlacementController>(true);
+            if (childController != null)
+            {
+                return childController;
+            }
+        }
+
+        return FindFirstObjectByType<RoadSignPlacementController>();
     }
 }
