@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 /// <summary>
 /// 車線数を減少させる標識効果
@@ -7,6 +7,8 @@
 public sealed class LaneReductionEffectAsset : RoadSignEffectAsset
 {
     [SerializeField] private int reduceCount = 1;
+
+    public override RoadSignEffectTarget Target => RoadSignEffectTarget.NonOwnerOnly;
 
     public override void Apply(RoadSignQueryContext _context, RoadSignEvaluation _evaluation)
     {

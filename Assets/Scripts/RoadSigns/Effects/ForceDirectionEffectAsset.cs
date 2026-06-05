@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 /// <summary>
 /// 進行方向を強制する標識効果
@@ -7,6 +7,8 @@
 public sealed class ForceDirectionEffectAsset : RoadSignEffectAsset
 {
     [SerializeField] private TurnDirection direction = TurnDirection.Straight;
+
+    public override RoadSignEffectTarget Target => RoadSignEffectTarget.OwnerOnly;
 
     public override void Apply(RoadSignQueryContext _context, RoadSignEvaluation _evaluation)
     {

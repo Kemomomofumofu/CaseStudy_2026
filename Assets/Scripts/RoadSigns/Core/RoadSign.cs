@@ -11,9 +11,11 @@ public class RoadSign : MonoBehaviour
     [Header("基本設定")]
     [SerializeField] private RoadSignDefinition definition = null;
     [SerializeField] private Collider influenceTrigger = null;
+    [SerializeField] private GameObject owner = null;
 
     public int Priority => definition != null ? definition.Priority : 0;
     public int PlacementOrder { get; private set; } = 0;
+    public GameObject Owner => owner;
 
     /// <summary>
     /// 初期化
@@ -74,6 +76,7 @@ public class RoadSign : MonoBehaviour
         {
             RoadSignEffectAsset effect = effects[i];
             if (effect == null) continue;
+            if (!effect.CanApplyTo(_context?.Actor, owner)) continue;
 
             effect.Apply(_context, _evaluation);
         }
@@ -85,5 +88,10 @@ public class RoadSign : MonoBehaviour
     public void SetDefinition(RoadSignDefinition _definition)
     {
         definition = _definition;
+    }
+
+    public void SetOwner(GameObject _owner)
+    {
+        owner = _owner;
     }
 }

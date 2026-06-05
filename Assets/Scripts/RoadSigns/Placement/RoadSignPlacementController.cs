@@ -32,6 +32,7 @@ public sealed class RoadSignPlacementController : MonoBehaviour
         Quaternion rotation = ResolvePlacementRotation(signPrefab);
         RoadSign instance = Instantiate(signPrefab, snappedPosition, rotation);
         instance.SetDefinition(definition);
+        instance.SetOwner(ResolveOwner());
     }
 
     private Vector3 ResolvePlacementPosition(Vector3 hitPoint)
@@ -76,6 +77,26 @@ public sealed class RoadSignPlacementController : MonoBehaviour
         if (!TryGetForwardDirection(out Vector3 forward)) return signPrefab.transform.rotation;
 
         return Quaternion.LookRotation(forward.normalized, Vector3.up);
+    }
+
+    private GameObject ResolveOwner()
+    {
+        if (placementForwardSource != null)
+        {
+            PlayerController forwardOwner = placementForwardSource.GetComponentInParent<PlayerController>();
+            if (forwardOwner != null)
+            {
+                return forwardOwner.gameObject;
+            }
+        }
+
+        PlayerController owner = GetComponentInParent<PlayerController>();
+        if (owner != null)
+        {
+            return owner.gameObject;
+        }
+
+        return null;
     }
 
     private bool TryGetForwardDirection(out Vector3 forward)
