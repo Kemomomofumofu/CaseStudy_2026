@@ -362,6 +362,14 @@ public class StageGraphEditorWindow : EditorWindow
             return;
         }
 
+        // Remove any previous generated parents to avoid duplicate/stale objects
+        var prevInterParent = GameObject.Find("StageGraph_Intersections");
+        if (prevInterParent != null)
+        {
+            Undo.DestroyObjectImmediate(prevInterParent);
+            Debug.Log("Removed existing StageGraph_Intersections before generation.");
+        }
+
         // Create parent object for intersections
         GameObject parent = new GameObject("StageGraph_Intersections");
         Undo.RegisterCreatedObjectUndo(parent, "Create Intersections Parent");
@@ -372,7 +380,9 @@ public class StageGraphEditorWindow : EditorWindow
         for (int i = 0; i < graph.intersections.Count; ++i)
         {
             var node = graph.intersections[i];
-            Vector3 pos = new Vector3((node.position.x - 0.5f) * worldWidth, 0f, (node.position.y - 0.5f) * worldHeight);
+            // Note: texture Y is normalized top->bottom. Convert to world Z with origin at center
+            // by flipping Y so that top of texture maps to positive Z consistently.
+            Vector3 pos = new Vector3((node.position.x - 0.5f) * worldWidth, 0f, (0.5f - node.position.y) * worldHeight);
             GameObject go;
             if (intersectionPrefab != null)
             {
@@ -390,6 +400,14 @@ public class StageGraphEditorWindow : EditorWindow
             go.transform.position = pos;
             Intersection inter = go.GetComponent<Intersection>() ?? go.AddComponent<Intersection>();
             map[node.id] = inter;
+        }
+
+        // Remove any previous generated ways parent to avoid duplicate/stale Way objects
+        var prevWaysParent = GameObject.Find("StageGraph_Ways");
+        if (prevWaysParent != null)
+        {
+            Undo.DestroyObjectImmediate(prevWaysParent);
+            Debug.Log("Removed existing StageGraph_Ways before generation.");
         }
 
         // Create Ways for each road
@@ -640,7 +658,10 @@ public class StageGraphEditorWindow : EditorWindow
                 for (int ti = 0; ti < turnDirections.Length; ++ti)
                 {
                     TurnDirection turnDirection = turnDirections[ti];
-                    Way targetWay = _intersection.GetWayByTurn(forwardAtTo.normalized, turnDirection);
+                    // GetWayByTurn expects a forward vector pointing from the intersection
+                    // into the incoming way's direction. Our forwardAtTo is from start->end
+                    // (toward the intersection), so invert it to match the intersection-local convention.
+                    Way targetWay = _intersection.GetWayByTurn((-forwardAtTo).normalized, turnDirection);
                     if (targetWay == null) continue;
                     Lane targetLane = GetLaneByIndexOrDefault_Local(targetWay, sourceLane.LaneIndex);
                     if (targetLane == null) continue;
