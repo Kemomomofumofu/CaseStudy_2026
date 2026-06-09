@@ -2,6 +2,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "RoadSigns/Definition", fileName = "RoadSignDefinition")]
+/// <summary>
+/// 標識の表示情報、効果、Prefab、寿命をまとめた定義データ
+/// </summary>
 public sealed class RoadSignDefinition : ScriptableObject
 {
     [Header("表示設定")]

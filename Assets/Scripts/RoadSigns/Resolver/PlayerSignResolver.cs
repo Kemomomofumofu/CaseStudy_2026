@@ -1,9 +1,12 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// 標識の評価結果をプレイヤーの移動状態へ変換する
+/// </summary>
 public sealed class PlayerSignResolver
 {
     /// <summary>
-    /// 指定方向に進めるか判定する
+    /// 標識の通行制限を考慮して指定方向へ進めるか判定する
     /// </summary>
     public bool CanMove(RoadSignEvaluation _evaluation, TurnDirection _direction)
     {
@@ -13,7 +16,7 @@ public sealed class PlayerSignResolver
     }
 
     /// <summary>
-    /// 標識評価後の移動速度を返す
+    /// 標識の加速と速度制限を反映した移動速度を取得する
     /// </summary>
     public float ResolveMoveSpeed(RoadSignEvaluation _evaluation, float _baseSpeed)
     {
@@ -23,7 +26,7 @@ public sealed class PlayerSignResolver
     }
 
     /// <summary>
-    /// 標識評価後の進行方向を返す
+    /// 強制方向やランダム方向を反映した進行方向を取得する
     /// </summary>
     public TurnDirection ResolveTurnDirection(RoadSignEvaluation _evaluation, TurnDirection _defaultDirection)
     {
@@ -38,7 +41,7 @@ public sealed class PlayerSignResolver
     }
 
     /// <summary>
-    /// 一時停止が必要か判定する
+    /// 標識による一時停止が必要か判定する
     /// </summary>
     public bool RequiresStop(RoadSignEvaluation _evaluation)
     {
@@ -46,7 +49,7 @@ public sealed class PlayerSignResolver
     }
 
     /// <summary>
-    /// 車線減少数を返す
+    /// 標識によって減少する車線数を取得する
     /// </summary>
     public int ResolveLaneReduction(RoadSignEvaluation _evaluation)
     {
@@ -54,7 +57,7 @@ public sealed class PlayerSignResolver
     }
 
     /// <summary>
-    /// ランダム方向を決定する
+    /// すべての進行方向からランダムな方向を決定する
     /// </summary>
     private TurnDirection GetRandomDirection()
     {

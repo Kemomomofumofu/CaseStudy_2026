@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 標識の手札と選択状態を管理する
+/// </summary>
 public sealed class RoadSignHandController : MonoBehaviour
 {
     [SerializeField] private List<RoadSignHandEntry> entries = new();
@@ -13,7 +16,7 @@ public sealed class RoadSignHandController : MonoBehaviour
     public int SelectedIndex => selectedIndex;
 
     /// <summary>
-    /// 使用する手札を選択する
+    /// 指定された位置の手札を選択して変更を通知する
     /// </summary>
     public void SelectIndex(int _index)
     {
@@ -28,7 +31,7 @@ public sealed class RoadSignHandController : MonoBehaviour
     }
 
     /// <summary>
-    /// 選択中の標識を1枚消費し、DefinitionとPrefabを返す
+    /// 選択中の標識を1枚消費して定義とPrefabを取得する
     /// </summary>
     public bool TryConsumeSelected(out RoadSignDefinition _definition, out RoadSign _signPrefab)
     {
@@ -53,7 +56,7 @@ public sealed class RoadSignHandController : MonoBehaviour
     }
 
     /// <summary>
-    /// 選択中の手札情報を取得する
+    /// 使用可能な選択中の手札情報を取得する
     /// </summary>
     public bool TryGetSelected(out RoadSignHandEntry _entry)
     {

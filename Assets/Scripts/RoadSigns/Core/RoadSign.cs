@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 標識の共通クラス
+/// 道路標識の定義、所有者、効果範囲を管理する
 /// </summary>
 public class RoadSign : MonoBehaviour
 {
@@ -18,7 +18,7 @@ public class RoadSign : MonoBehaviour
     public GameObject Owner => owner;
 
     /// <summary>
-    /// 初期化
+    /// コライダーを標識の効果範囲として初期設定する
     /// </summary>
     protected virtual void Reset()
     {
@@ -29,11 +29,17 @@ public class RoadSign : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 標識が配置された順番を記録する
+    /// </summary>
     protected virtual void Awake()
     {
         PlacementOrder = ++nextPlacementOrder;
     }
 
+    /// <summary>
+    /// 標識に寿命が設定されている場合は自動破棄を予約する
+    /// </summary>
     protected virtual void Start()
     {
         if (definition != null && definition.LifeTime > 0f)
@@ -43,9 +49,8 @@ public class RoadSign : MonoBehaviour
     }
 
     /// <summary>
-    /// 標識の影響範囲に入った場合の処理
+    /// 効果範囲へ入った対象にこの標識を登録する
     /// </summary>
-    /// <param name="_other">影響範囲に入ったオブジェクトのコライダー</param>
     protected virtual void OnTriggerEnter(Collider _other)
     {
         if (_other.TryGetComponent(out RoadSignReceiver receiver))
@@ -54,6 +59,9 @@ public class RoadSign : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 効果範囲から出た対象からこの標識を解除する
+    /// </summary>
     protected virtual void OnTriggerExit(Collider _other)
     {
         if (_other.TryGetComponent(out RoadSignReceiver receiver))
@@ -63,7 +71,7 @@ public class RoadSign : MonoBehaviour
     }
 
     /// <summary>
-    /// 標識の効果を評価する
+    /// 対象と所有者の関係を確認し、適用可能な標識効果を評価する
     /// </summary>
     public virtual void Evaluate(RoadSignQueryContext _context, RoadSignEvaluation _evaluation)
     {
@@ -83,13 +91,16 @@ public class RoadSign : MonoBehaviour
     }
 
     /// <summary>
-    /// 標識の定義を設定する
+    /// この標識で使用する定義を設定する
     /// </summary>
     public void SetDefinition(RoadSignDefinition _definition)
     {
         definition = _definition;
     }
 
+    /// <summary>
+    /// この標識を配置した所有者を設定する
+    /// </summary>
     public void SetOwner(GameObject _owner)
     {
         owner = _owner;

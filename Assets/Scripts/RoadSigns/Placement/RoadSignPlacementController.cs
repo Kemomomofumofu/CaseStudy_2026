@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 道路標識の配置を管理するコントローラー。
+/// 選択中の道路標識をグリッド上へ配置する
 /// </summary>
 public sealed class RoadSignPlacementController : MonoBehaviour
 {
@@ -19,6 +19,9 @@ public sealed class RoadSignPlacementController : MonoBehaviour
     [SerializeField] private float gridGizmoHeight = 0.02f;
     [SerializeField] private float gridGizmoRadius = 0.05f;
 
+    /// <summary>
+    /// 選択中の標識を所有者の前方グリッドへ配置する
+    /// </summary>
     public void PlaceSelectedAtForwardGrid()
     {   
         if (gridSize <= 0f)
@@ -44,6 +47,9 @@ public sealed class RoadSignPlacementController : MonoBehaviour
         instance.SetOwner(owner);
     }
 
+    /// <summary>
+    /// 前方位置をグリッドと地面の高さに合わせて配置位置を決定する
+    /// </summary>
     private Vector3 ResolvePlacementPosition(Vector3 hitPoint)
     {
         Vector3 target = hitPoint;
@@ -59,6 +65,9 @@ public sealed class RoadSignPlacementController : MonoBehaviour
         return snapped;
     }
 
+    /// <summary>
+    /// レイキャストで配置位置の地面の高さを取得する
+    /// </summary>
     private float ResolveGroundHeight(Vector3 position, float fallbackHeight)
     {
         float rayHeight = Mathf.Max(0.1f, groundRaycastHeight);
@@ -71,6 +80,9 @@ public sealed class RoadSignPlacementController : MonoBehaviour
         return fallbackHeight;
     }
 
+    /// <summary>
+    /// ワールド座標を設定されたグリッド間隔へ揃える
+    /// </summary>
     private Vector3 SnapToGrid(Vector3 worldPosition)
     {
         Vector3 offset = worldPosition - gridOrigin;
@@ -80,6 +92,9 @@ public sealed class RoadSignPlacementController : MonoBehaviour
         return snapped;
     }
 
+    /// <summary>
+    /// 配置元の前方を基準に標識の向きを決定する
+    /// </summary>
     private Quaternion ResolvePlacementRotation(RoadSign signPrefab)
     {
         if (signPrefab == null)
@@ -95,6 +110,9 @@ public sealed class RoadSignPlacementController : MonoBehaviour
         return Quaternion.LookRotation(forward.normalized, Vector3.up);
     }
 
+    /// <summary>
+    /// 標識を配置したプレイヤーを所有者として取得する
+    /// </summary>
     private GameObject ResolveOwner()
     {
         if (placementForwardSource != null)
@@ -115,6 +133,9 @@ public sealed class RoadSignPlacementController : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// 配置元から水平な前方方向を取得する
+    /// </summary>
     private bool TryGetForwardDirection(out Vector3 forward)
     {
         forward = Vector3.zero;
@@ -129,6 +150,9 @@ public sealed class RoadSignPlacementController : MonoBehaviour
         return isValid;
     }
 
+    /// <summary>
+    /// 選択中の手札を消費して標識定義とPrefabを取得する
+    /// </summary>
     private bool TryResolveSelectedSign(out RoadSignDefinition definition, out RoadSign signPrefab)
     {
         definition = null;
@@ -143,6 +167,9 @@ public sealed class RoadSignPlacementController : MonoBehaviour
         return resolved;
     }
 
+    /// <summary>
+    /// 選択中のオブジェクト周辺へ配置グリッドのGizmoを描画する
+    /// </summary>
     private void OnDrawGizmosSelected()
     {
         Color prevColor = Gizmos.color;

@@ -2,16 +2,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 現在有効な標識を集めるクラス
-/// プレイヤー側につける
+/// 対象が現在影響を受けている道路標識を管理する
 /// </summary>
 public class RoadSignReceiver : MonoBehaviour
 {
     private readonly List<RoadSign> activeSigns = new();
 
     /// <summary>
-    /// 現在影響範囲内にある標識を管理する
-    /// プレイヤー側に付ける
+    /// 効果範囲へ入った標識を有効な標識として登録する
     /// </summary>
     public void AddSign(RoadSign _sign)
     {
@@ -21,9 +19,8 @@ public class RoadSignReceiver : MonoBehaviour
     }
 
     /// <summary>
-    /// 有効な標識を削除する
+    /// 効果範囲から外れた標識を有効な標識から解除する
     /// </summary>
-    /// <param name="_sign">削除する標識</param>
     public void RemoveSign(RoadSign _sign)
     {
         if (_sign == null) return;
@@ -32,7 +29,7 @@ public class RoadSignReceiver : MonoBehaviour
     }
 
     /// <summary>
-    /// 現在有効な標識をすべて評価する
+    /// 現在有効な標識を優先度順に評価する
     /// </summary>
     public RoadSignEvaluation Evaluate(RoadSignQueryContext _context)
     {
@@ -60,13 +57,16 @@ public class RoadSignReceiver : MonoBehaviour
     }
 
     /// <summary>
-    /// リストから破壊された標識を削除する
+    /// 破棄済みの標識を管理リストから削除する
     /// </summary>
     private void RemoveDestroyedSigns()
     {
         activeSigns.RemoveAll(sign => sign == null);
     }
 
+    /// <summary>
+    /// 標識の優先度と配置順を比較する
+    /// </summary>
     private int CompareSignPriority(RoadSign a, RoadSign b)
     {
         int priorityCompare = a.Priority.CompareTo(b.Priority);
