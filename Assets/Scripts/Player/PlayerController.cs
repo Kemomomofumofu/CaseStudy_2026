@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -50,7 +51,38 @@ public class PlayerController : MonoBehaviour
     [Tooltip("障害物回避の先読み距離（s差）")]
     [SerializeField] private float aiAvoidLookahead = 4.0f;
 
+    [Header("CPU標識設定")]
+    [Tooltip("CPU が交差点手前で進行方向の標識を配置する")]
+    [SerializeField] private bool aiCanPlaceRoadSigns = true;
+    [Tooltip("交差点の何m手前から標識を配置するか")]
+    [SerializeField] private float aiRoadSignPlacementDistance = 5.0f;
+    [Tooltip("標識配置位置を丸めるグリッドサイズ。0 以下なら丸めない")]
+    [SerializeField] private float aiRoadSignGridSize = 5.0f;
+    [Tooltip("標識配置時の地面検出レイ高さ")]
+    [SerializeField] private float aiRoadSignGroundRaycastHeight = 5.0f;
+    [Tooltip("近くに既に標識がある場合の重複配置チェック半径")]
+    [SerializeField] private float aiRoadSignDuplicateCheckRadius = 1.0f;
+    [Tooltip("CPU が配置する標識候補。未設定ならシーン内の手札から取得")]
+    [SerializeField] private List<RoadSignDefinition> aiRoadSignDefinitions = new();
+    [Tooltip("標識候補を借りる手札。未設定ならシーン内から自動検索")]
+    [SerializeField] private RoadSignHandController aiRoadSignSourceHand = null;
+
+    [Header("CPU妨害標識設定")]
+    [Tooltip("CPU が定期的に妨害標識の配置を判定する")]
+    [SerializeField] private bool aiCanPlaceSabotageSigns = true;
+    [Tooltip("妨害標識を配置するか判定する間隔（秒）")]
+    [SerializeField] private float aiSabotageSignInterval = 5.0f;
+    [Tooltip("判定ごとに妨害標識を配置する確率（0..1）")]
+    [SerializeField, Range(0f, 1f)] private float aiSabotageSignPlaceChance = 0.5f;
+    [Tooltip("現在位置からどれだけ前方に妨害標識を置くか（Lane の s 差）")]
+    [SerializeField] private float aiSabotageSignPlacementDistance = 5.0f;
+
     private float aiDecisionTimer = 0.0f;
+    private float aiSabotageSignTimer = 0.0f;
+    private readonly List<RoadSignDefinition> aiRoadSignCandidateBuffer = new();
+    private readonly List<RoadSignDefinition> aiSabotageSignCandidateBuffer = new();
+    private readonly List<TurnDirection> aiAvailableTurnBuffer = new();
+    private Lane aiRoadSignHandledLane = null;
 
     public TurnDirection queuedTurnDirection = TurnDirection.Straight;
     public TurnDirection QueuedTurnDirection => queuedTurnDirection;
@@ -67,6 +99,9 @@ public class PlayerController : MonoBehaviour
 
     private readonly PlayerSignResolver signResolver = new(); // 標識解決用
 
+    /// <summary>
+    /// 標識受信コンポーネントの参照を初期化する
+    /// </summary>
     private void Awake()
     {
         if (signReceiver == null)
@@ -76,6 +111,9 @@ public class PlayerController : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// プレイヤーを初期状態へ戻し、レーン上の位置へ同期する
+    /// </summary>
     private void Start()
     {
         ResetToInitialState();
@@ -89,6 +127,7 @@ public class PlayerController : MonoBehaviour
     {
         UpdateStopTimer();
         UpdateLaneShiftTimer();
+        UpdateAISabotageSign();
 
         UpdateInput();
         UpdateQueuedTurnDirectionBySign();
@@ -132,6 +171,41 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// CPUの妨害標識タイマーを更新し、一定間隔で配置するかランダムに判定する
+    /// </summary>
+    private void UpdateAISabotageSign()
+    {
+        if (!isCPU || !aiCanPlaceSabotageSigns)
+        {
+            return;
+        }
+
+        aiSabotageSignTimer -= Time.deltaTime;
+        if (aiSabotageSignTimer > 0f)
+        {
+            return;
+        }
+
+        aiSabotageSignTimer = Mathf.Max(0.1f, aiSabotageSignInterval);
+
+        if (UnityEngine.Random.value >= aiSabotageSignPlaceChance)
+        {
+            return;
+        }
+
+        Lane currentLane = pathState.CurrentLane;
+        if (currentLane == null)
+        {
+            return;
+        }
+
+        TryPlaceRandomSabotageSign(currentLane);
+    }
+
+    /// <summary>
+    /// プレイヤー入力またはCPUの判断に応じた操作を更新する
+    /// </summary>
     private void UpdateInput()
     {
         if (isStopping)
@@ -206,6 +280,8 @@ public class PlayerController : MonoBehaviour
         {
             return;
         }
+
+        TryPlaceIntersectionRoadSign(currentLane);
 
         // --- 障害物回避 ---
         float lookStart = pathState.CurrentS + obstacleCheckMargin;
@@ -352,6 +428,8 @@ public class PlayerController : MonoBehaviour
         queuedTurnDirection = TurnDirection.Straight;
         aiDecisionTimer = 0f;
         laneShiftTimer = 0f;
+        aiSabotageSignTimer = Mathf.Max(0.1f, aiSabotageSignInterval);
+        aiRoadSignHandledLane = null;
     }
 
     /// <summary>
@@ -431,7 +509,383 @@ public class PlayerController : MonoBehaviour
     {
         isCPU = cpu;
         aiDecisionTimer = 0f;
+        aiSabotageSignTimer = Mathf.Max(0.1f, aiSabotageSignInterval);
+        aiRoadSignHandledLane = null;
     }
+
+    #region --- CPU標識配置 ---
+    /// <summary>
+    /// CPUの前方へランダムに選んだ妨害標識を配置する
+    /// </summary>
+    private void TryPlaceRandomSabotageSign(Lane currentLane)
+    {
+        if (!TryResolveRandomAISabotageSign(out RoadSignDefinition definition))
+        {
+            return;
+        }
+
+        float targetS = Mathf.Min(
+            currentLane.Length,
+            pathState.CurrentS + Mathf.Max(0f, aiSabotageSignPlacementDistance));
+
+        TryPlaceAIRoadSign(definition, currentLane, targetS);
+    }
+
+    /// <summary>
+    /// 交差点手前で進行方向を決定し、必要に応じて方向看板を配置する
+    /// </summary>
+    private void TryPlaceIntersectionRoadSign(Lane currentLane)
+    {
+        if (!aiCanPlaceRoadSigns || currentLane == null || aiRoadSignHandledLane == currentLane)
+        {
+            return;
+        }
+
+        float remainingDistance = currentLane.Length - pathState.CurrentS;
+        if (remainingDistance > Mathf.Max(0f, aiRoadSignPlacementDistance))
+        {
+            return;
+        }
+
+        aiRoadSignHandledLane = currentLane;
+
+        if (!TryResolveAvailableTurn(currentLane, out TurnDirection turnDirection))
+        {
+            return;
+        }
+
+        queuedTurnDirection = turnDirection;
+
+        if (turnDirection == TurnDirection.Straight)
+        {
+            return;
+        }
+
+        if (!TryResolveAIRoadSign(turnDirection, out RoadSignDefinition definition))
+        {
+            return;
+        }
+
+        TryPlaceAIRoadSign(definition, currentLane, currentLane.Length);
+    }
+
+    /// <summary>
+    /// 現在のレーンから進める方向を収集し、CPUの進行方向を決定する
+    /// </summary>
+    private bool TryResolveAvailableTurn(Lane currentLane, out TurnDirection turnDirection)
+    {
+        turnDirection = TurnDirection.Straight;
+        aiAvailableTurnBuffer.Clear();
+
+        AddAvailableTurn(currentLane, TurnDirection.Straight);
+        AddAvailableTurn(currentLane, TurnDirection.Left);
+        AddAvailableTurn(currentLane, TurnDirection.Right);
+
+        if (aiAvailableTurnBuffer.Count > 0)
+        {
+            int index = UnityEngine.Random.Range(0, aiAvailableTurnBuffer.Count);
+            turnDirection = aiAvailableTurnBuffer[index];
+            return true;
+        }
+
+        if (currentLane.GetNextLane(TurnDirection.Back) != null
+            && TryResolveAIRoadSign(TurnDirection.Back, out _))
+        {
+            turnDirection = TurnDirection.Back;
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// 道と対応看板が存在する進行方向を選択候補へ追加する
+    /// </summary>
+    private void AddAvailableTurn(Lane currentLane, TurnDirection turnDirection)
+    {
+        if (currentLane.GetNextLane(turnDirection) == null)
+        {
+            return;
+        }
+
+        if (turnDirection != TurnDirection.Straight
+            && !TryResolveAIRoadSign(turnDirection, out _))
+        {
+            return;
+        }
+
+        aiAvailableTurnBuffer.Add(turnDirection);
+    }
+
+    /// <summary>
+    /// 指定された進行方向に対応するCPU用看板定義を検索する
+    /// </summary>
+    private bool TryResolveAIRoadSign(TurnDirection turnDirection, out RoadSignDefinition definition)
+    {
+        definition = null;
+        CollectAIRoadSignCandidates();
+
+        if (aiRoadSignCandidateBuffer.Count == 0)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < aiRoadSignCandidateBuffer.Count; i++)
+        {
+            RoadSignDefinition candidate = aiRoadSignCandidateBuffer[i];
+            if (TryGetForcedDirection(candidate, out TurnDirection candidateDirection)
+                && candidateDirection == turnDirection)
+            {
+                definition = candidate;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// CPUが利用できる妨害標識からランダムに1つ選択する
+    /// </summary>
+    private bool TryResolveRandomAISabotageSign(out RoadSignDefinition definition)
+    {
+        definition = null;
+        aiSabotageSignCandidateBuffer.Clear();
+        CollectAIRoadSignCandidates();
+
+        for (int i = 0; i < aiRoadSignCandidateBuffer.Count; i++)
+        {
+            RoadSignDefinition candidate = aiRoadSignCandidateBuffer[i];
+            if (IsSabotageRoadSign(candidate))
+            {
+                aiSabotageSignCandidateBuffer.Add(candidate);
+            }
+        }
+
+        if (aiSabotageSignCandidateBuffer.Count == 0)
+        {
+            return false;
+        }
+
+        int index = UnityEngine.Random.Range(0, aiSabotageSignCandidateBuffer.Count);
+        definition = aiSabotageSignCandidateBuffer[index];
+        return true;
+    }
+
+    /// <summary>
+    /// Inspector設定またはシーン内の手札からCPU用標識候補を収集する
+    /// </summary>
+    private void CollectAIRoadSignCandidates()
+    {
+        aiRoadSignCandidateBuffer.Clear();
+
+        if (aiRoadSignDefinitions != null)
+        {
+            for (int i = 0; i < aiRoadSignDefinitions.Count; i++)
+            {
+                AddAIRoadSignCandidate(aiRoadSignDefinitions[i]);
+            }
+        }
+
+        if (aiRoadSignCandidateBuffer.Count == 0)
+        {
+            AddAIRoadSignCandidatesFromHand();
+        }
+    }
+
+    /// <summary>
+    /// シーン内の手札からCPUが使用できる看板候補を収集する
+    /// </summary>
+    private void AddAIRoadSignCandidatesFromHand()
+    {
+        if (aiRoadSignSourceHand == null)
+        {
+            aiRoadSignSourceHand = GetComponentInChildren<RoadSignHandController>(true);
+        }
+
+        if (aiRoadSignSourceHand == null)
+        {
+            aiRoadSignSourceHand = FindFirstObjectByType<RoadSignHandController>();
+        }
+
+        if (aiRoadSignSourceHand == null)
+        {
+            return;
+        }
+
+        IReadOnlyList<RoadSignHandEntry> entries = aiRoadSignSourceHand.Entries;
+        for (int i = 0; i < entries.Count; i++)
+        {
+            RoadSignHandEntry entry = entries[i];
+            if (entry == null)
+            {
+                continue;
+            }
+
+            AddAIRoadSignCandidate(entry.Definition);
+        }
+    }
+
+    /// <summary>
+    /// 使用可能な看板定義を重複しないよう候補へ追加する
+    /// </summary>
+    private void AddAIRoadSignCandidate(RoadSignDefinition candidate)
+    {
+        if (candidate == null || candidate.SignPrefab == null)
+        {
+            return;
+        }
+
+        if (aiRoadSignCandidateBuffer.Contains(candidate))
+        {
+            return;
+        }
+
+        aiRoadSignCandidateBuffer.Add(candidate);
+    }
+
+    /// <summary>
+    /// 標識定義が所有者以外へ作用する妨害効果を持つか判定する
+    /// </summary>
+    private bool IsSabotageRoadSign(RoadSignDefinition definition)
+    {
+        if (definition == null || definition.Effects == null)
+        {
+            return false;
+        }
+
+        IReadOnlyList<RoadSignEffectAsset> effects = definition.Effects;
+        for (int i = 0; i < effects.Count; i++)
+        {
+            RoadSignEffectAsset effect = effects[i];
+            if (effect != null && effect.Target == RoadSignEffectTarget.NonOwnerOnly)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// 看板定義から強制される進行方向を取得する
+    /// </summary>
+    private bool TryGetForcedDirection(RoadSignDefinition definition, out TurnDirection direction)
+    {
+        direction = TurnDirection.Straight;
+        if (definition == null || definition.Effects == null)
+        {
+            return false;
+        }
+
+        IReadOnlyList<RoadSignEffectAsset> effects = definition.Effects;
+        for (int i = 0; i < effects.Count; i++)
+        {
+            if (effects[i] is ForceDirectionEffectAsset forceDirectionEffect)
+            {
+                direction = forceDirectionEffect.Direction;
+                return direction != TurnDirection.Straight;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// 指定されたレーン位置へCPU所有の標識を生成する
+    /// </summary>
+    private bool TryPlaceAIRoadSign(RoadSignDefinition definition, Lane lane, float targetS)
+    {
+        if (definition == null || lane == null || definition.SignPrefab == null)
+        {
+            return false;
+        }
+
+        RoadSign signPrefab = definition.SignPrefab;
+        Vector3 lanePosition = lane.GetPositionByS(targetS);
+        Vector3 placePosition = aiRoadSignGridSize > 0f
+            ? SnapAIRoadSignPosition(lanePosition)
+            : lanePosition;
+
+        placePosition.y = ResolveAIRoadSignGroundHeight(placePosition, lanePosition.y);
+
+        if (HasRoadSignNear(placePosition))
+        {
+            return false;
+        }
+
+        Vector3 forward = lane.GetForwardByS(targetS);
+        forward.y = 0f;
+        if (forward.sqrMagnitude <= 1e-6f)
+        {
+            forward = transform.forward;
+            forward.y = 0f;
+        }
+
+        Quaternion rotation = forward.sqrMagnitude > 1e-6f
+            ? Quaternion.LookRotation(forward.normalized, Vector3.up)
+            : signPrefab.transform.rotation;
+
+        RoadSign instance = Instantiate(signPrefab, placePosition, rotation);
+        instance.SetDefinition(definition);
+        instance.SetOwner(gameObject);
+        return true;
+    }
+
+    /// <summary>
+    /// 看板の配置位置を指定されたグリッド間隔へ揃える
+    /// </summary>
+    private Vector3 SnapAIRoadSignPosition(Vector3 worldPosition)
+    {
+        float gridSize = Mathf.Max(0.01f, aiRoadSignGridSize);
+        float snappedX = Mathf.Round(worldPosition.x / gridSize) * gridSize;
+        float snappedZ = Mathf.Round(worldPosition.z / gridSize) * gridSize;
+        return new Vector3(snappedX, worldPosition.y, snappedZ);
+    }
+
+    /// <summary>
+    /// レイキャストで看板を配置する地面の高さを取得する
+    /// </summary>
+    private float ResolveAIRoadSignGroundHeight(Vector3 position, float fallbackHeight)
+    {
+        float rayHeight = Mathf.Max(0.1f, aiRoadSignGroundRaycastHeight);
+        Vector3 origin = position + Vector3.up * rayHeight;
+        if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, rayHeight * 2f, ~0, QueryTriggerInteraction.Ignore))
+        {
+            return hit.point.y;
+        }
+
+        return fallbackHeight;
+    }
+
+    /// <summary>
+    /// 配置予定位置の近くに既存の看板があるか確認する
+    /// </summary>
+    private bool HasRoadSignNear(Vector3 position)
+    {
+        if (aiRoadSignDuplicateCheckRadius <= 0f)
+        {
+            return false;
+        }
+
+        Collider[] colliders = Physics.OverlapSphere(
+            position,
+            aiRoadSignDuplicateCheckRadius,
+            ~0,
+            QueryTriggerInteraction.Collide);
+
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            Collider hit = colliders[i];
+            if (hit != null && hit.GetComponentInParent<RoadSign>() != null)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    #endregion --- CPU標識配置 ---
 
 
     #region --- 標識関連 ---
@@ -486,7 +940,7 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// 標識を考慮して進行方向を決定する
+    /// 標識による停止効果を確認し、必要に応じてプレイヤーを停止させる
     /// </summary>
 
     private void ApplyStopBySign()

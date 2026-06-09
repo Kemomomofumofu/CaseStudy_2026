@@ -801,6 +801,17 @@ MonoBehaviour:
   aiDecisionInterval: 0.1
   aiLaneShiftChance: 0.08
   aiAvoidLookahead: 4
+  aiCanPlaceRoadSigns: 1
+  aiRoadSignPlacementDistance: 5
+  aiRoadSignGridSize: 5
+  aiRoadSignGroundRaycastHeight: 5
+  aiRoadSignDuplicateCheckRadius: 1
+  aiRoadSignDefinitions: []
+  aiRoadSignSourceHand: {fileID: 6603011033733415000}
+  aiCanPlaceSabotageSigns: 1
+  aiSabotageSignInterval: 5
+  aiSabotageSignPlaceChance: 0.5
+  aiSabotageSignPlacementDistance: 5
   queuedTurnDirection: 0
   laneShiftCooldown: 1
   signReceiver: {fileID: 5374435262958340588}

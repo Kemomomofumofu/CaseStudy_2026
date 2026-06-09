@@ -4851,6 +4851,27 @@ MonoBehaviour:
   aiDecisionInterval: 0.01
   aiLaneShiftChance: 0
   aiAvoidLookahead: 4
+  aiCanPlaceRoadSigns: 1
+  aiRoadSignPlacementDistance: 5
+  aiRoadSignGridSize: 5
+  aiRoadSignGroundRaycastHeight: 5
+  aiRoadSignDuplicateCheckRadius: 1
+  aiRoadSignDefinitions:
+  - {fileID: 11400000, guid: a504c3d22d0c6624e9801b146a58596c, type: 2}
+  - {fileID: 11400000, guid: 3dc73fcbbcf75964b85e66623aaed2b0, type: 2}
+  - {fileID: 11400000, guid: 34de08813f04a6e42a6bb0e7e18fa5bf, type: 2}
+  - {fileID: 11400000, guid: 019617e09967f3144bf763529ae6ef5d, type: 2}
+  - {fileID: 11400000, guid: 7a48f4438ebf62e409cbffb6907c7093, type: 2}
+  - {fileID: 11400000, guid: 2f183b09e21f444f8f12e3102ef9322b, type: 2}
+  - {fileID: 11400000, guid: d34973062f054755bb6ec20d2df4cbdf, type: 2}
+  - {fileID: 11400000, guid: f92c1d93e4308344b91b4e366276110e, type: 2}
+  - {fileID: 11400000, guid: 39fca00e1cee48228fc41545fd2246aa, type: 2}
+  - {fileID: 11400000, guid: 4922bf385842f27418c08a52b3b6da1c, type: 2}
+  aiRoadSignSourceHand: {fileID: 0}
+  aiCanPlaceSabotageSigns: 1
+  aiSabotageSignInterval: 5
+  aiSabotageSignPlaceChance: 0.5
+  aiSabotageSignPlacementDistance: 5
   queuedTurnDirection: 0
   laneShiftCooldown: 1
   signReceiver: {fileID: 0}
