@@ -11,6 +11,7 @@ public sealed class RoadSignDefinition : ScriptableObject
     [SerializeField] private string displayName = "";
     [SerializeField] private Sprite icon = null;
     [SerializeField] private Texture2D signTexture = null;
+    [SerializeField] private string visualObjectName = "";
 
     [Header("効果設定")]
     [SerializeField] private int priority = 0;
@@ -54,4 +55,6 @@ public sealed class RoadSignDefinition : ScriptableObject
     public RoadSign SignPrefab => signPrefab;
     public List<RoadSignEffectAsset> Effects => effects;
     public float LifeTime => lifeTime;
+    public Texture2D SignTexture => signTexture;
+    public string VisualObjectName => visualObjectName;
 }
