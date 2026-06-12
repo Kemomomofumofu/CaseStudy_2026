@@ -17,7 +17,7 @@ public class GoalTrigger : MonoBehaviour
         if (isFinished) return;
 
         // Playeri‚Ü‚½‚Í PlayerRootj‚ªæ‚ÉƒS[ƒ‹
-        if (other.CompareTag("Player") || other.CompareTag("PlayerRoot"))
+        if (other.CompareTag("Player") /*|| other.CompareTag("Player")*/)
         {
             isFinished = true;
             Debug.Log("===== YOU WIN =====");
