@@ -96,6 +96,7 @@ public class SystemButtonController : MonoBehaviour
         if (targetSceneIndex >= 0 && targetSceneIndex < SceneManager.sceneCountInBuildSettings)
         {
             SceneManager.LoadScene(targetSceneIndex);
+            Debug.LogError($"{targetSceneIndex}シーンをロード");
         }
         else
         {

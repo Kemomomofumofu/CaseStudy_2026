@@ -17,6 +17,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Stage2.unity
     guid: fb45d082346e5f74bab3e9686a161fa0
+  - enabled: 1
+    path: Assets/Scenes/UIScene/Title_Scene.unity
+    guid: 8886ea92f91c04b4ebf2a8d9b16fd286
+  - enabled: 1
+    path: Assets/Scenes/UIScene/StageSelect_Scene.unity
+    guid: 5d4b055b640da13489d323040bf15cf6
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
