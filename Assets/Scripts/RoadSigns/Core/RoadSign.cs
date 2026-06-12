@@ -13,6 +13,9 @@ public class RoadSign : MonoBehaviour
     [SerializeField] private Collider influenceTrigger = null;
     [SerializeField] private GameObject owner = null;
 
+    [Header("表示設定")]
+    [SerializeField] private Transform visualRoot = null;
+
     public int Priority => definition != null ? definition.Priority : 0;
     public int PlacementOrder { get; private set; } = 0;
     public GameObject Owner => owner;
@@ -35,6 +38,7 @@ public class RoadSign : MonoBehaviour
     protected virtual void Awake()
     {
         PlacementOrder = ++nextPlacementOrder;
+        ApplyDefinitionVisual();
     }
 
     /// <summary>
@@ -96,6 +100,7 @@ public class RoadSign : MonoBehaviour
     public void SetDefinition(RoadSignDefinition _definition)
     {
         definition = _definition;
+        ApplyDefinitionVisual();
     }
 
     /// <summary>
@@ -104,5 +109,44 @@ public class RoadSign : MonoBehaviour
     public void SetOwner(GameObject _owner)
     {
         owner = _owner;
+    }
+
+    /// <summary>
+    /// 標識定義に対応する表示モデルだけを有効にする
+    /// </summary>
+    private void ApplyDefinitionVisual()
+    {
+        if (visualRoot == null || definition == null || string.IsNullOrEmpty(definition.VisualObjectName))
+        {
+            return;
+        }
+
+        Renderer[] renderers = visualRoot.GetComponentsInChildren<Renderer>(true);
+        Renderer targetRenderer = null;
+
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            if (renderers[i].gameObject.name == definition.VisualObjectName)
+            {
+                targetRenderer = renderers[i];
+                break;
+            }
+        }
+
+        if (targetRenderer == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            GameObject visualObject = renderers[i].gameObject;
+            if (!visualObject.name.StartsWith("看板"))
+            {
+                continue;
+            }
+
+            visualObject.SetActive(renderers[i] == targetRenderer);
+        }
     }
 }
