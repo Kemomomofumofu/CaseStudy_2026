@@ -938,7 +938,7 @@ public class WayGeneratorWindow : EditorWindow
             {
                 TurnDirection turnDirection = turnDirections[i];
                 // 曲がり方向から接続先Wayを取得
-                Way targetWay = _info.To.GetWayByTurn(_info.ForwardAtTo, turnDirection);
+                Way targetWay = _info.To.GetWayByTurn(-_info.ForwardAtTo, turnDirection);
                 // 接続先Wayがないならスキップ
                 if (targetWay == null)
                 {
@@ -1051,7 +1051,7 @@ public class WayGeneratorWindow : EditorWindow
             return false;
         }
 
-        Vector3 forwardAtTo = baseLane.EndPoint.position - baseLane.StartPoint.position;
+        Vector3 forwardAtTo = (baseLane.StartPoint.position - baseLane.EndPoint.position).normalized;
         forwardAtTo.y = 0f;
         if (forwardAtTo.sqrMagnitude <= 1e-6f)
         {

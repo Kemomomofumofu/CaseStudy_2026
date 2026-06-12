@@ -1,5 +1,4 @@
 using UnityEditor;
-using UnityEditor;
 using UnityEditor.TerrainTools;
 using UnityEngine;
 using System.Collections.Generic;
@@ -314,7 +313,54 @@ public class StageGraphEditorWindow : EditorWindow
     }
 
 
+    private bool IsStraightNode(EditorNode node)
+    {
+        List<EditorRoad> connected = new();
 
+        foreach (var road in graph.roads)
+        {
+            if (road.from == node.id || road.to == node.id)
+            {
+                connected.Add(road);
+            }
+        }
+
+        if (connected.Count != 2)
+            return false;
+
+        EditorNode nodeA = null;
+        EditorNode nodeB = null;
+
+        foreach (var road in connected)
+        {
+            string otherId =
+                road.from == node.id
+                ? road.to
+                : road.from;
+
+            var other =
+                graph.intersections.Find(x => x.id == otherId);
+
+            if (nodeA == null)
+                nodeA = other;
+            else
+                nodeB = other;
+        }
+
+        if (nodeA == null || nodeB == null)
+            return false;
+
+        Vector2 dir1 =
+            (nodeA.position - node.position).normalized;
+
+        Vector2 dir2 =
+            (nodeB.position - node.position).normalized;
+
+        float angle =
+            Vector2.Angle(dir1, dir2);
+
+        return Mathf.Abs(angle - 180f) < 10f;
+    }
 
     private void SaveGraph()
     {
