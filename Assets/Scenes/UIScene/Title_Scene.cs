@@ -17,5 +17,10 @@ public class Title_Scene : MonoBehaviour
     public void On_ExitButton()
     {
         Debug.Log("エグジット判定"); // コンソールに表示
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
     }
 }
