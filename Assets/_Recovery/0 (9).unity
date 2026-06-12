@@ -16575,7 +16575,7 @@ PrefabInstance:
     - target: {fileID: 8639991699691531283, guid: 090d09a7341147a46ba0d17d9268f5fa, type: 3}
       propertyPath: initialLane
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1121857660}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -44541,7 +44541,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4907665926524747198, guid: f224d83ce46daac478aae4916ef614b4, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 51.4
+      value: -50.7
       objectReference: {fileID: 0}
     - target: {fileID: 4907665926524747198, guid: f224d83ce46daac478aae4916ef614b4, type: 3}
       propertyPath: m_LocalPosition.y
@@ -44549,7 +44549,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4907665926524747198, guid: f224d83ce46daac478aae4916ef614b4, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -139.8
+      value: 185
       objectReference: {fileID: 0}
     - target: {fileID: 4907665926524747198, guid: f224d83ce46daac478aae4916ef614b4, type: 3}
       propertyPath: m_LocalRotation.w
