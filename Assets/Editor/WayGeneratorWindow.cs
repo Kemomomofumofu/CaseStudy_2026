@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using Codice.CM.Client.Differences;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -908,30 +909,42 @@ public class WayGeneratorWindow : EditorWindow
 
     private static void SetupLaneLinksByIntersection(GeneratedWayInfo _info)
     {
-        // Lane情報が不正なら終了
-        for (int laneIndex = 0; laneIndex < _info.Lanes.Count; ++laneIndex)
+        var lanes = _info.Lanes;
+        if (lanes == null || lanes.Count == 0)
+            return;
+
+        // ★重要：交差点「到着方向」
+        Vector3 forwardAtTo = _info.ForwardAtTo;
+        forwardAtTo.y = 0f;
+
+        if (forwardAtTo.sqrMagnitude <= 1e-6f)
+            return;
+
+        forwardAtTo.Normalize();
+
+        // 交差点に入ってくる方向
+        Vector3 incomingDir = -forwardAtTo;
+
+        TurnDirection[] turnDirections =
         {
-            Lane sourceLane = _info.Lanes[laneIndex];
-            if (sourceLane == null) continue;
-
-            List<LaneLinkSeed> seeds = new();
-
-            Vector3 incoming = (sourceLane.EndPoint.position - sourceLane.StartPoint.position);
-            incoming.y = 0;
-            incoming.Normalize();
-
-            TurnDirection[] turnDirections =
-            {
         TurnDirection.Straight,
         TurnDirection.Left,
         TurnDirection.Right,
         TurnDirection.Back
     };
 
-            foreach (var turn in turnDirections)
+        for (int laneIndex = 0; laneIndex < lanes.Count; ++laneIndex)
+        {
+            Lane sourceLane = lanes[laneIndex];
+            if (sourceLane == null) continue;
+
+            var seeds = new List<LaneLinkSeed>();
+
+            for (int t = 0; t < turnDirections.Length; ++t)
             {
-                // ★ここが本体
-                Way targetWay = _info.To.GetWayByTurn(incoming, turn);
+                var turn = turnDirections[t];
+
+                Way targetWay = _info.To.GetWayByTurn(incomingDir, turn);
                 if (targetWay == null) continue;
 
                 Lane targetLane = GetLaneByIndexOrDefault(targetWay, sourceLane.LaneIndex);
