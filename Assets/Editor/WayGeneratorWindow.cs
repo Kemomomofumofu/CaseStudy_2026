@@ -716,6 +716,34 @@ public class WayGeneratorWindow : EditorWindow
             EditorUtility.SetDirty(lane);
         }
 
+        // 生成後、念のため各LaneのStart/Endが_from側を向いているか確認し、逆なら入れ替える
+        for (int li = 0; li < createdLanes.Count; ++li)
+        {
+            var lane = createdLanes[li];
+            if (lane == null) continue;
+            if (lane.StartPoint == null || lane.EndPoint == null) continue;
+
+            float distStart = Vector3.Distance(lane.StartPoint.position, fromPos);
+            float distEnd = Vector3.Distance(lane.EndPoint.position, fromPos);
+
+            // StartPoint が fromPos より遠ければ逆向きになっているので入れ替える
+            if (distStart > distEnd)
+            {
+                Vector3 tmp = lane.StartPoint.position;
+                lane.StartPoint.position = lane.EndPoint.position;
+                lane.EndPoint.position = tmp;
+
+                SerializedObject laneSO = new(lane);
+                var spStart = laneSO.FindProperty("startPoint");
+                var spEnd = laneSO.FindProperty("endPoint");
+                var tmpRef = spStart.objectReferenceValue;
+                spStart.objectReferenceValue = spEnd.objectReferenceValue;
+                spEnd.objectReferenceValue = tmpRef;
+                laneSO.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(lane);
+            }
+        }
+
         // WayにLane配列を設定
         SetWayLanes(way, createdLanes);
 
@@ -844,11 +872,11 @@ public class WayGeneratorWindow : EditorWindow
             return lanes;
         }
 
-        // null以外のLaneを収集
+        // null以外かつアクティブなLaneを収集（非アクティブレーンはリンク生成に含めない）
         for (int i = 0; i < _way.Lanes.Count; ++i)
         {
             Lane lane = _way.Lanes[i];
-            if (lane != null)
+            if (lane != null && lane.gameObject != null && lane.gameObject.activeInHierarchy)
             {
                 lanes.Add(lane);
             }
@@ -1010,7 +1038,8 @@ public class WayGeneratorWindow : EditorWindow
         for (int i = 0; i < lanes.Count; ++i)
         {
             Lane lane = lanes[i];
-            if (lane != null && lane.StartPoint != null && lane.EndPoint != null)
+            // 非アクティブなレーンは扱わない
+            if (lane != null && lane.gameObject != null && lane.gameObject.activeInHierarchy && lane.StartPoint != null && lane.EndPoint != null)
             {
                 baseLane = lane;
                 break;

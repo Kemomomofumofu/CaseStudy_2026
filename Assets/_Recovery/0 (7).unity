@@ -1163,10 +1163,6 @@ PrefabInstance:
       propertyPath: target
       value: 
       objectReference: {fileID: 1321982691}
-    - target: {fileID: 5753885030529298906, guid: 976fc22f62e79514cba1d47f1af723f1, type: 3}
-      propertyPath: m_IgnoreReversedGraphics
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 6603011033733415000, guid: 976fc22f62e79514cba1d47f1af723f1, type: 3}
       propertyPath: entries.Array.size
       value: 13
@@ -8354,7 +8350,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1375930392}
   m_Layer: 0
-  m_Name: Road_Set
+  m_Name: RoadSet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
