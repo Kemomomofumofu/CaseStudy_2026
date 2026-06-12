@@ -8,6 +8,7 @@ public class Title_Scene : MonoBehaviour
     // スタート処理（ここからステージセレクトシーンへ）
     public void On_StartButton()
     {
+        //SceneLoad用の関数なので、これをコピペすると、簡単にシーン遷移
         SceneManager.LoadScene("StageSelect_Scene");
         Debug.Log("スタート判定"); // コンソールに表示
     }

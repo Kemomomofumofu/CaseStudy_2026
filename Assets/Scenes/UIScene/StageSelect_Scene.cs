@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class ScrollMenuController : MonoBehaviour
@@ -30,22 +31,27 @@ public class ScrollMenuController : MonoBehaviour
         switch (buttonName)
         {
             case "Stage1":
+                SceneManager.LoadScene("Stage1");
                 Debug.Log("Stage1選択");
                 break;
 
             case "Stage2":
+                SceneManager.LoadScene("Stage2");
                 Debug.Log("Stage2選択");
                 break;
 
             case "Stage3":
+                SceneManager.LoadScene("Stage3");
                 Debug.Log("Stage3選択");
                 break;
 
             case "Stage4":
+                SceneManager.LoadScene("Stage4");
                 Debug.Log("Stage4選択");
                 break;
 
             case "Stage5":
+                SceneManager.LoadScene("Stage5");
                 Debug.Log("Stage5選択");
                 Application.Quit();
                 break;
