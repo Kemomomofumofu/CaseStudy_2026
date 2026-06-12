@@ -6,8 +6,24 @@ using UnityEngine.InputSystem;
 /// <summary>
 /// プレイヤーの操作を管理するクラス
 /// </summary>
+/// 
+
 public class PlayerController : MonoBehaviour
 {
+
+    /// <summary>
+    /// プレイヤーを初期状態へ戻し、レーン上の位置へ同期する
+    /// </summary>
+
+private void Start()
+    {
+        ResetToInitialState();
+
+        Debug.Log("InitialLane = " + initialLane);
+
+        SyncTransformToLane();
+    }
+
     [Header("初期状態")]
     [Tooltip("プレイヤーの初期レーン")]
     [SerializeField] private Lane initialLane;
@@ -120,14 +136,7 @@ public class PlayerController : MonoBehaviour
     }
 
 
-    /// <summary>
-    /// プレイヤーを初期状態へ戻し、レーン上の位置へ同期する
-    /// </summary>
-    private void Start()
-    {
-        ResetToInitialState();
-        SyncTransformToLane();
-    }
+
 
     /// <summary>
     /// プレイヤーの入力（またはCPUの意思決定）を管理
