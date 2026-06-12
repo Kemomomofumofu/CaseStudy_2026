@@ -27,6 +27,15 @@ public class PlayerController : MonoBehaviour
     [Tooltip("交差点で進行方向を決める距離（Lane終端からの距離）")]
     [SerializeField] private float intersectionDecisionDistance = 0.6f;
 
+    [Header("レーン接続補間")]
+    [Tooltip("レーン切り替え時に接続部分を曲線で補間する")]
+    [SerializeField] private bool useSmoothLaneTransition = true;
+    [Tooltip("次のレーンの始点から何m先で補間を終えるか")]
+    [SerializeField, Min(0f)] private float laneTransitionJoinDistance = 2.0f;
+    [Tooltip("接続曲線の制御点を端点から離す最大距離")]
+    [SerializeField, Min(0f)] private float laneTransitionMaxHandleLength = 3.0f;
+    private readonly LaneTransitionCurve laneTransitionCurve = new();
+
     [Header("障害物設定")]
     [Tooltip("障害物に衝突した際の停止時間")]
     [SerializeField] private float obstacleStopDuration = 1.0f;
@@ -339,6 +348,11 @@ public class PlayerController : MonoBehaviour
     /// <param name="_laneOffset">-1:左 / +1:右</param>
     private void TryShiftLane(int _laneOffset)
     {
+        if (laneTransitionCurve.IsActive)
+        {
+            return;
+        }
+
         if (laneShiftTimer > 0f)
         {
             return;
@@ -381,8 +395,15 @@ public class PlayerController : MonoBehaviour
 
         // 標識による速度制限を考慮
         float currentMoveSpeed = ResolveMoveSpeedBySign();
+        float moveDistance = currentMoveSpeed * Time.deltaTime;
 
-        float nextS = pathState.CurrentS + currentMoveSpeed * Time.deltaTime;
+        if (laneTransitionCurve.IsActive)
+        {
+            AdvanceLaneTransition(moveDistance);
+            return;
+        }
+
+        float nextS = pathState.CurrentS + moveDistance;
 
         // 障害物チェック
         LaneObstacle hitObstacle;
@@ -407,6 +428,20 @@ public class PlayerController : MonoBehaviour
                 return;
             }
 
+            if (useSmoothLaneTransition &&
+                laneTransitionCurve.TryBegin(
+                    currentLane,
+                    nextLane,
+                    laneTransitionJoinDistance,
+                    laneTransitionMaxHandleLength))
+            {
+                pathState.CurrentLane = nextLane;
+                pathState.CurrentS = 0f;
+                queuedTurnDirection = TurnDirection.Straight;
+                AdvanceLaneTransition(remain);
+                return;
+            }
+
             // 次のレーンへ移動
             pathState.CurrentLane = nextLane;
             pathState.CurrentS = remain;
@@ -420,10 +455,28 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
+    /// レーン間の接続曲線上を進み、完了後は次のレーン上の移動へ戻す
+    /// </summary>
+    private void AdvanceLaneTransition(float _moveDistance)
+    {
+        if (!laneTransitionCurve.Advance(
+                _moveDistance,
+                out float overflowDistance))
+        {
+            return;
+        }
+
+        pathState.CurrentS =
+            laneTransitionCurve.TargetS +
+            overflowDistance;
+    }
+
+    /// <summary>
     /// 初期化
     /// </summary>
     private void ResetToInitialState()
     {
+        laneTransitionCurve.Clear();
         pathState.Reset(initialLane, initialS);
         queuedTurnDirection = TurnDirection.Straight;
         aiDecisionTimer = 0f;
@@ -443,9 +496,20 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // レーン上の位置と方向を取得
-        Vector3 position = currentLane.GetPositionByS(pathState.CurrentS);
-        Vector3 forward = currentLane.GetForwardByS(pathState.CurrentS);
+        Vector3 position;
+        Vector3 forward;
+
+        if (laneTransitionCurve.IsActive)
+        {
+            position = laneTransitionCurve.GetPosition();
+            forward = laneTransitionCurve.GetForward();
+        }
+        else
+        {
+            // レーン上の位置と方向を取得
+            position = currentLane.GetPositionByS(pathState.CurrentS);
+            forward = currentLane.GetForwardByS(pathState.CurrentS);
+        }
 
         transform.position = position;
 
