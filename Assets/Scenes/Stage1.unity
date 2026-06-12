@@ -2074,6 +2074,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Way_Intersection_1ToIntersection_4
       objectReference: {fileID: 0}
+    - target: {fileID: 4798042900539755126, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7226387100272417272, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
       propertyPath: m_LocalPosition.x
       value: -73.7
@@ -4511,6 +4515,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Way_Intersection_2ToIntersection_5
       objectReference: {fileID: 0}
+    - target: {fileID: 4798042900539755126, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7226387100272417272, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
       propertyPath: m_LocalPosition.x
       value: -193.37
@@ -5582,6 +5590,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ResultUI_Prefab
       objectReference: {fileID: 0}
+    - target: {fileID: 3192347013008802578, guid: 905a9eb4b90925f4888b043b68fac156, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3334052544044064310, guid: 905a9eb4b90925f4888b043b68fac156, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -5680,6 +5692,10 @@ PrefabInstance:
     - target: {fileID: 4798042900539755126, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
       propertyPath: m_Name
       value: Way_Intersection_1ToIntersection_2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4798042900539755126, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7226387100272417272, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
       propertyPath: m_LocalPosition.x
@@ -6833,6 +6849,10 @@ PrefabInstance:
     - target: {fileID: 4798042900539755126, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
       propertyPath: m_Name
       value: Way_Intersection_8ToIntersection_9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4798042900539755126, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7226387100272417272, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
       propertyPath: m_LocalPosition.x
@@ -9135,6 +9155,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Way_Intersection_2ToIntersection_3
       objectReference: {fileID: 0}
+    - target: {fileID: 4798042900539755126, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7226387100272417272, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
       propertyPath: m_LocalPosition.x
       value: -238.8
@@ -9386,6 +9410,10 @@ PrefabInstance:
     - target: {fileID: 4798042900539755126, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
       propertyPath: m_Name
       value: Way_Intersection_5ToIntersection_8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4798042900539755126, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7226387100272417272, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
       propertyPath: m_LocalPosition.x
@@ -10008,6 +10036,10 @@ PrefabInstance:
     - target: {fileID: 4798042900539755126, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
       propertyPath: m_Name
       value: Way_Intersection_0ToIntersection_1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4798042900539755126, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7226387100272417272, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
       propertyPath: m_LocalScale.z
@@ -11867,6 +11899,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Way_Intersection_8ToIntersection_10
       objectReference: {fileID: 0}
+    - target: {fileID: 4798042900539755126, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7226387100272417272, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
       propertyPath: m_LocalPosition.x
       value: -26.2
@@ -13509,13 +13545,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1279313285}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
+  m_LocalRotation: {x: 0.7047063, y: -0.17700912, z: 0.18882546, w: 0.66060716}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+  m_LocalEulerAnglesHint: {x: 93.7, y: -30, z: 0}
 --- !u!114 &1279313288
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15588,6 +15624,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Way_Intersection_5ToIntersection_7
       objectReference: {fileID: 0}
+    - target: {fileID: 4798042900539755126, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7226387100272417272, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
       propertyPath: m_LocalPosition.x
       value: -193.3
@@ -16246,6 +16286,10 @@ PrefabInstance:
     - target: {fileID: 7943163289161911991, guid: 0203495ece6f2f543999fc122817f08b, type: 3}
       propertyPath: m_Name
       value: CourseManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 7943163289161911991, guid: 0203495ece6f2f543999fc122817f08b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -20221,6 +20265,10 @@ PrefabInstance:
     - target: {fileID: 4798042900539755126, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
       propertyPath: m_Name
       value: Way_Intersection_5ToIntersection_6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4798042900539755126, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7226387100272417272, guid: f9817e2cf2ce7ca4e84115e5b20dc0d5, type: 3}
       propertyPath: m_LocalPosition.x
