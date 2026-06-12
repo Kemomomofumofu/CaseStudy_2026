@@ -16,7 +16,7 @@ MonoBehaviour:
   - from: {fileID: 0}
     to:
     - intersection: {fileID: 0}
-      directionType: 0
+      directionType: 1
       laneCount: 3
       allowLeftTurn: 1
       allowRightTurn: 1
@@ -24,7 +24,7 @@ MonoBehaviour:
   - from: {fileID: 0}
     to:
     - intersection: {fileID: 0}
-      directionType: 0
+      directionType: 1
       laneCount: 3
       allowLeftTurn: 1
       allowRightTurn: 1
@@ -32,7 +32,13 @@ MonoBehaviour:
   - from: {fileID: 0}
     to:
     - intersection: {fileID: 0}
-      directionType: 0
+      directionType: 1
+      laneCount: 3
+      allowLeftTurn: 1
+      allowRightTurn: 1
+      allowStraight: 1
+    - intersection: {fileID: 0}
+      directionType: 1
       laneCount: 3
       allowLeftTurn: 1
       allowRightTurn: 1
@@ -40,7 +46,19 @@ MonoBehaviour:
   - from: {fileID: 0}
     to:
     - intersection: {fileID: 0}
-      directionType: 0
+      directionType: 1
+      laneCount: 3
+      allowLeftTurn: 1
+      allowRightTurn: 1
+      allowStraight: 1
+    - intersection: {fileID: 0}
+      directionType: 1
+      laneCount: 3
+      allowLeftTurn: 1
+      allowRightTurn: 1
+      allowStraight: 1
+    - intersection: {fileID: 0}
+      directionType: 1
       laneCount: 3
       allowLeftTurn: 1
       allowRightTurn: 1
@@ -48,7 +66,13 @@ MonoBehaviour:
   - from: {fileID: 0}
     to:
     - intersection: {fileID: 0}
-      directionType: 0
+      directionType: 1
+      laneCount: 3
+      allowLeftTurn: 1
+      allowRightTurn: 1
+      allowStraight: 1
+    - intersection: {fileID: 0}
+      directionType: 1
       laneCount: 3
       allowLeftTurn: 1
       allowRightTurn: 1
