@@ -53,7 +53,6 @@ public class MinimapController : MonoBehaviour
     private RenderTexture renderTexture;
     private Canvas canvas;
     private RectTransform minimapRoot;
-    // プレイヤーも他マーカーと同じく動くアイコンとして管理
     private RectTransform playerIcon;
     private readonly List<(MinimapMarker marker, RectTransform icon, RectTransform edgeIcon)> trackedIcons = new();
     private float nextRefreshTime;
@@ -64,12 +63,6 @@ public class MinimapController : MonoBehaviour
         radius = minimapDiameter * 0.5f;
         CreateCamera();
         CreateUI();
-    }
-
-    private void Start()
-    {
-        if (autoFit)
-            FitCameraToMarkers();
     }
 
     private void OnDestroy()
@@ -83,14 +76,13 @@ public class MinimapController : MonoBehaviour
 
     private void LateUpdate()
     {
+        UpdateCameraPosition();
         UpdateIconPositions();
 
         if (Time.time >= nextRefreshTime)
         {
             nextRefreshTime = Time.time + markerRefreshInterval;
             RefreshMarkers();
-            if (autoFit)
-                FitCameraToMarkers();
         }
     }
 
@@ -174,65 +166,30 @@ public class MinimapController : MonoBehaviour
         minimapRoot.sizeDelta = new Vector2(minimapDiameter, minimapDiameter);
         minimapRoot.anchoredPosition = new Vector2(-(margin + radius), -(margin + radius));
 
-        // プレイヤーアイコン（三角形・動く）
+        // プレイヤーアイコン（三角形・中央固定）
         playerIcon = CreateDotIcon(minimapRoot, playerColor, playerIconSize, true);
-        playerIcon.gameObject.SetActive(false);
-    }
-
-    // ────────── AutoFit ──────────
-
-    private void FitCameraToMarkers()
-    {
-        if (minimapCam == null) return;
-
-        // MinimapMarker 全体の AABB を計算
-        MinimapMarker[] all = FindObjectsByType<MinimapMarker>(FindObjectsSortMode.None);
-        if (all.Length == 0) return;
-
-        Vector3 min = new Vector3(float.MaxValue, 0, float.MaxValue);
-        Vector3 max = new Vector3(float.MinValue, 0, float.MinValue);
-        foreach (var m in all)
-        {
-            Vector3 p = m.transform.position;
-            if (p.x < min.x) min.x = p.x;
-            if (p.z < min.z) min.z = p.z;
-            if (p.x > max.x) max.x = p.x;
-            if (p.z > max.z) max.z = p.z;
-        }
-
-        Vector3 center = (min + max) * 0.5f;
-        float halfW = (max.x - min.x) * 0.5f * autoFitPadding;
-        float halfH = (max.z - min.z) * 0.5f * autoFitPadding;
-        float size = Mathf.Max(halfW, halfH, 10f);
-
-        minimapCam.transform.position = new Vector3(center.x, cameraHeight, center.z);
-        minimapCam.orthographicSize = size;
+        playerIcon.anchoredPosition = Vector2.zero;
     }
 
     // ────────── 毎フレーム更新 ──────────
+
+    private void UpdateCameraPosition()
+    {
+        if (playerTarget == null || minimapCam == null) return;
+        Vector3 pos = playerTarget.position;
+        pos.y = cameraHeight;
+        minimapCam.transform.position = pos;
+    }
 
     private void UpdateIconPositions()
     {
         if (minimapCam == null || minimapRoot == null) return;
 
-        // プレイヤーアイコン
+        // プレイヤーアイコン（常に中央・向きだけ回転）
         if (playerIcon != null && playerTarget != null)
         {
-            Vector3 vp = minimapCam.WorldToViewportPoint(playerTarget.position);
-            bool inBounds = vp.z > 0f && vp.x >= 0f && vp.x <= 1f && vp.y >= 0f && vp.y <= 1f;
-            Vector2 localPos = new Vector2((vp.x - 0.5f) * minimapDiameter, (vp.y - 0.5f) * minimapDiameter);
-
-            if (inBounds && localPos.magnitude <= radius - playerIconSize * 0.5f)
-            {
-                playerIcon.gameObject.SetActive(true);
-                playerIcon.anchoredPosition = localPos;
-                float angle = -playerTarget.eulerAngles.y;
-                playerIcon.localRotation = Quaternion.Euler(0f, 0f, angle);
-            }
-            else
-            {
-                playerIcon.gameObject.SetActive(false);
-            }
+            float angle = -playerTarget.eulerAngles.y;
+            playerIcon.localRotation = Quaternion.Euler(0f, 0f, angle);
         }
 
         // その他マーカー
