@@ -18058,7 +18058,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc15af46163c66047915bba662cd97de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MinimapMarker
-  markerType: 0
+  playerTarget: {fileID: 735869548}
+  mapCenter: {x: 0, y: 0, z: 0}
+  orthographicSize: 100
+  cameraHeight: 200
+  autoFit: 1
+  autoFitPadding: 1.15
+  minimapDiameter: 200
+  margin: 20
+  borderWidth: 5
+  borderColor: {r: 0.85, g: 0.72, b: 0.2, a: 1}
+  playerColor: {r: 1, g: 0.9, b: 0, a: 1}
+  cpuColor: {r: 1, g: 0.25, b: 0.25, a: 1}
+  goalColor: {r: 0, g: 0.9, b: 1, a: 1}
+  playerIconSize: 16
+  cpuIconSize: 10
+  goalIconSize: 12
+  showGoalDirectionOnEdge: 1
+  edgeMarkerSize: 10
+  markerRefreshInterval: 1
 --- !u!4 &1804123227
 Transform:
   m_ObjectHideFlags: 0

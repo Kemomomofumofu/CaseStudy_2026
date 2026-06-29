@@ -16261,7 +16261,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8639991699691531283, guid: 090d09a7341147a46ba0d17d9268f5fa, type: 3}
       propertyPath: moveSpeed
-      value: 25
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 8639991699691531283, guid: 090d09a7341147a46ba0d17d9268f5fa, type: 3}
       propertyPath: initialLane
@@ -16274,7 +16274,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2719699995348355692, guid: 090d09a7341147a46ba0d17d9268f5fa, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1232835621}
   m_SourcePrefab: {fileID: 100100000, guid: 090d09a7341147a46ba0d17d9268f5fa, type: 3}
 --- !u!1 &786956595
 GameObject:
@@ -20254,6 +20257,69 @@ Transform:
   m_Children: []
   m_Father: {fileID: 135511013}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &997378492
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 997378494}
+  - component: {fileID: 997378493}
+  m_Layer: 0
+  m_Name: MiniMap
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &997378493
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 997378492}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc15af46163c66047915bba662cd97de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MinimapMarker
+  playerTarget: {fileID: 1270261212}
+  mapCenter: {x: 0, y: 0, z: 0}
+  orthographicSize: 100
+  cameraHeight: 200
+  autoFit: 1
+  autoFitPadding: 1.15
+  minimapDiameter: 400
+  margin: 20
+  borderWidth: 5
+  borderColor: {r: 0.85, g: 0.72, b: 0.2, a: 1}
+  playerColor: {r: 1, g: 0.9, b: 0, a: 1}
+  cpuColor: {r: 1, g: 0.25, b: 0.25, a: 1}
+  goalColor: {r: 0, g: 0.9, b: 1, a: 1}
+  playerIconSize: 20
+  cpuIconSize: 20
+  goalIconSize: 20
+  showGoalDirectionOnEdge: 1
+  edgeMarkerSize: 20
+  markerRefreshInterval: 1
+--- !u!4 &997378494
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 997378492}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 179.48895, y: -63.08403, z: 77.77171}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1005138272
 GameObject:
   m_ObjectHideFlags: 0
@@ -23550,6 +23616,24 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1584532847491030919, guid: e186668fc6f8c994b80a01e6ce1ec5ed, type: 3}
   m_PrefabInstance: {fileID: 1229470018}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1232835620 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2719699995348355692, guid: 090d09a7341147a46ba0d17d9268f5fa, type: 3}
+  m_PrefabInstance: {fileID: 780709629}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1232835621
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1232835620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17ede713671b32c4cb687689ee87adcf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MinimapMarker
+  markerType: 1
 --- !u!1 &1238081043
 GameObject:
   m_ObjectHideFlags: 0
@@ -31274,6 +31358,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: acde2c90d6367214cae5831598788ed0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Lane
+--- !u!1 &1562115207 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2442938253311419530, guid: f224d83ce46daac478aae4916ef614b4, type: 3}
+  m_PrefabInstance: {fileID: 2114187828}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1562115208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1562115207}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17ede713671b32c4cb687689ee87adcf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MinimapMarker
+  markerType: 2
 --- !u!1 &1563246981
 GameObject:
   m_ObjectHideFlags: 0
@@ -43866,7 +43968,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2442938253311419530, guid: f224d83ce46daac478aae4916ef614b4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1562115208}
   m_SourcePrefab: {fileID: 100100000, guid: f224d83ce46daac478aae4916ef614b4, type: 3}
 --- !u!1001 &2116906526
 PrefabInstance:
@@ -45169,3 +45274,4 @@ SceneRoots:
   - {fileID: 2114187828}
   - {fileID: 1752926313}
   - {fileID: 39031892}
+  - {fileID: 997378494}
