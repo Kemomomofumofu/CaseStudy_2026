@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 /// <summary>
-/// 標識を評価するときに渡す状況情報
+/// 道路標識を評価するときに使用する対象の状況情報
 /// </summary>
 public class RoadSignQueryContext
 {

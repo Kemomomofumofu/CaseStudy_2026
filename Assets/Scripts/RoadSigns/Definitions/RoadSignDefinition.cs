@@ -2,12 +2,16 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "RoadSigns/Definition", fileName = "RoadSignDefinition")]
+/// <summary>
+/// 標識の表示情報、効果、Prefab、寿命をまとめた定義データ
+/// </summary>
 public sealed class RoadSignDefinition : ScriptableObject
 {
     [Header("表示設定")]
     [SerializeField] private string displayName = "";
     [SerializeField] private Sprite icon = null;
     [SerializeField] private Texture2D signTexture = null;
+    [SerializeField] private string visualObjectName = "";
 
     [Header("効果設定")]
     [SerializeField] private int priority = 0;
@@ -51,4 +55,6 @@ public sealed class RoadSignDefinition : ScriptableObject
     public RoadSign SignPrefab => signPrefab;
     public List<RoadSignEffectAsset> Effects => effects;
     public float LifeTime => lifeTime;
+    public Texture2D SignTexture => signTexture;
+    public string VisualObjectName => visualObjectName;
 }

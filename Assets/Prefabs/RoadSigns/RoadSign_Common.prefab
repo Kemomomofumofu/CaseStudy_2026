@@ -76,6 +76,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoadSign
   definition: {fileID: 11400000, guid: 39fca00e1cee48228fc41545fd2246aa, type: 2}
   influenceTrigger: {fileID: 6816922382926835729}
+  visualRoot: {fileID: 5150668688603475310}
+  visualScaleMultiplier: 1.2
 --- !u!1 &7074006407869343281
 GameObject:
   m_ObjectHideFlags: 0

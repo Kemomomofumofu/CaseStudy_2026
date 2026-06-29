@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// æ¨™è­˜ã®æ‰‹æœ­ã¨é¸æŠçŠ¶æ…‹ã‚’ç®¡ç†ã™ã‚‹
+/// </summary>
 public sealed class RoadSignHandController : MonoBehaviour
 {
     [SerializeField] private List<RoadSignHandEntry> entries = new();
@@ -13,26 +16,37 @@ public sealed class RoadSignHandController : MonoBehaviour
     public int SelectedIndex => selectedIndex;
 
     /// <summary>
-    /// g—p‚·‚éèD‚ğ‘I‘ğ‚·‚é
+    /// æŒ‡å®šã•ã‚ŒãŸä½ç½®ã®æ‰‹æœ­ã‚’é¸æŠã—ã¦å¤‰æ›´ã‚’é€šçŸ¥ã™ã‚‹
     /// </summary>
     public void SelectIndex(int _index)
     {
-        if (_index < 0 || _index >= entries.Count) return;
+
+        if (_index < 0 || _index >= entries.Count)
+        {
+            return;
+        }
 
         selectedIndex = _index;
         Changed?.Invoke();
     }
 
     /// <summary>
-    /// ‘I‘ğ’†‚Ì•W¯‚ğ1–‡Á”ï‚µADefinition‚ÆPrefab‚ğ•Ô‚·
+    /// é¸æŠä¸­ã®æ¨™è­˜ã‚’1æšæ¶ˆè²»ã—ã¦å®šç¾©ã¨Prefabã‚’å–å¾—ã™ã‚‹
     /// </summary>
     public bool TryConsumeSelected(out RoadSignDefinition _definition, out RoadSign _signPrefab)
     {
         _definition = null;
         _signPrefab = null;
 
-        if (!TryGetSelected(out RoadSignHandEntry entry)) return false;
-        if (!entry.TryConsume()) return false;
+        if (!TryGetSelected(out RoadSignHandEntry entry))
+        {
+            return false;
+        }
+
+        if (!entry.TryConsume())
+        {
+            return false;
+        }
 
         _definition = entry.Definition;
         _signPrefab = entry.SignPrefab;
@@ -42,16 +56,22 @@ public sealed class RoadSignHandController : MonoBehaviour
     }
 
     /// <summary>
-    /// ‘I‘ğ’†‚ÌèDî•ñ‚ğæ“¾‚·‚é
+    /// ä½¿ç”¨å¯èƒ½ãªé¸æŠä¸­ã®æ‰‹æœ­æƒ…å ±ã‚’å–å¾—ã™ã‚‹
     /// </summary>
     public bool TryGetSelected(out RoadSignHandEntry _entry)
     {
         _entry = null;
 
-        if (entries.Count == 0 || selectedIndex < 0 || selectedIndex >= entries.Count) return false;
+        if (entries.Count == 0 || selectedIndex < 0 || selectedIndex >= entries.Count)
+        {
+            return false;
+        }
 
         RoadSignHandEntry entry = entries[selectedIndex];
-        if (entry == null || !entry.CanUse) return false;
+        if (entry == null || !entry.CanUse)
+        {
+            return false;
+        }
 
         _entry = entry;
         return true;

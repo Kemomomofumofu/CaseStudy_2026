@@ -31,16 +31,14 @@ public sealed class RoadSignEvaluation
     /// <summary>
     /// この方向への進行を禁止する
     /// </summary>
-    /// <param name="_direction"></param>
     public void BlockDirection(TurnDirection _direction)
     {
         blockedDirections.Add(_direction);
     }
 
     /// <summary>
-    /// この方向への進行が禁止されているか
+    /// 指定方向への進行が禁止されているか確認する
     /// </summary>
-    /// <param name="_direction"></param>
     public bool IsBlocked(TurnDirection _direction)
     {
         return roadClosed || blockedDirections.Contains(_direction);
@@ -61,7 +59,7 @@ public sealed class RoadSignEvaluation
     }
 
     /// <summary>
-    /// 速度関係の効果を解決する
+    /// 加速と速度制限を反映した最終移動速度を計算する
     /// </summary>
     public float ResolveMoveSpeed(float _baseSpeed)
     {
@@ -75,9 +73,8 @@ public sealed class RoadSignEvaluation
     }
 
     /// <summary>
-    /// 移動する方向の設定
+    /// 強制する進行方向を設定する
     /// </summary>
-    /// <param name="_direction"></param>
     public void SetForcedDirection(TurnDirection _direction)
     {
         hasForcedDirection = true;
@@ -85,7 +82,7 @@ public sealed class RoadSignEvaluation
     }
 
     /// <summary>
-    /// 
+    /// 強制進行方向が設定されているか確認して取得する
     /// </summary>
     public bool TryGetForcedDirection(out TurnDirection _direction)
     {
@@ -112,7 +109,6 @@ public sealed class RoadSignEvaluation
     /// <summary>
     /// 加速度を追加する
     /// </summary>
-    /// <param name="_deltaSpeed"></param>
     public void AddAcceleration(float _deltaSpeed)
     {
         accelerationDelta += _deltaSpeed;
@@ -127,9 +123,8 @@ public sealed class RoadSignEvaluation
     }
 
     /// <summary>
-    /// 車線数現象
+    /// 適用する車線減少数を設定する
     /// </summary>
-    /// <param name="_reductionCount"></param>
     public void SetLaneReduction(int _reductionCount)
     {
         laneReductionCount = Mathf.Max(LaneReductionCount, _reductionCount);

@@ -716,6 +716,34 @@ public class WayGeneratorWindow : EditorWindow
             EditorUtility.SetDirty(lane);
         }
 
+        // 生成後、念のため各LaneのStart/Endが_from側を向いているか確認し、逆なら入れ替える
+        for (int li = 0; li < createdLanes.Count; ++li)
+        {
+            var lane = createdLanes[li];
+            if (lane == null) continue;
+            if (lane.StartPoint == null || lane.EndPoint == null) continue;
+
+            float distStart = Vector3.Distance(lane.StartPoint.position, fromPos);
+            float distEnd = Vector3.Distance(lane.EndPoint.position, fromPos);
+
+            // StartPoint が fromPos より遠ければ逆向きになっているので入れ替える
+            if (distStart > distEnd)
+            {
+                Vector3 tmp = lane.StartPoint.position;
+                lane.StartPoint.position = lane.EndPoint.position;
+                lane.EndPoint.position = tmp;
+
+                SerializedObject laneSO = new(lane);
+                var spStart = laneSO.FindProperty("startPoint");
+                var spEnd = laneSO.FindProperty("endPoint");
+                var tmpRef = spStart.objectReferenceValue;
+                spStart.objectReferenceValue = spEnd.objectReferenceValue;
+                spEnd.objectReferenceValue = tmpRef;
+                laneSO.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(lane);
+            }
+        }
+
         // WayにLane配列を設定
         SetWayLanes(way, createdLanes);
 
@@ -844,11 +872,11 @@ public class WayGeneratorWindow : EditorWindow
             return lanes;
         }
 
-        // null以外のLaneを収集
+        // null以外かつアクティブなLaneを収集（非アクティブレーンはリンク生成に含めない）
         for (int i = 0; i < _way.Lanes.Count; ++i)
         {
             Lane lane = _way.Lanes[i];
-            if (lane != null)
+            if (lane != null && lane.gameObject != null && lane.gameObject.activeInHierarchy)
             {
                 lanes.Add(lane);
             }
@@ -881,63 +909,44 @@ public class WayGeneratorWindow : EditorWindow
     private static void SetupLaneLinksByIntersection(GeneratedWayInfo _info)
     {
         // Lane情報が不正なら終了
-        if (_info.Lanes == null || _info.Lanes.Count == 0 || _info.To == null)
-        {
-            return;
-        }
-
-        TurnDirection[] turnDirections =
-        {
-            TurnDirection.Straight,
-            TurnDirection.Left,
-            TurnDirection.Right,
-            TurnDirection.Back
-        };
-
-        // 生成した各LaneごとにLinkを設定
         for (int laneIndex = 0; laneIndex < _info.Lanes.Count; ++laneIndex)
         {
             Lane sourceLane = _info.Lanes[laneIndex];
-            // Laneがnullならスキップ
-            if (sourceLane == null)
-            {
-                continue;
-            }
+            if (sourceLane == null) continue;
 
             List<LaneLinkSeed> seeds = new();
 
-            for (int i = 0; i < turnDirections.Length; ++i)
+            Vector3 incoming = (sourceLane.EndPoint.position - sourceLane.StartPoint.position);
+            incoming.y = 0;
+            incoming.Normalize();
+
+            TurnDirection[] turnDirections =
             {
-                TurnDirection turnDirection = turnDirections[i];
-                // 曲がり方向から接続先Wayを取得
-                Way targetWay = _info.To.GetWayByTurn(_info.ForwardAtTo, turnDirection);
-                // 接続先Wayがないならスキップ
-                if (targetWay == null)
-                {
-                    continue;
-                }
+        TurnDirection.Straight,
+        TurnDirection.Left,
+        TurnDirection.Right,
+        TurnDirection.Back
+    };
 
-                // 同一LaneIndex優先で接続先Laneを取得
+            foreach (var turn in turnDirections)
+            {
+                // ★ここが本体
+                Way targetWay = _info.To.GetWayByTurn(incoming, turn);
+                if (targetWay == null) continue;
+
                 Lane targetLane = GetLaneByIndexOrDefault(targetWay, sourceLane.LaneIndex);
-                // 接続先Laneがないならスキップ
-                if (targetLane == null)
-                {
-                    continue;
-                }
+                if (targetLane == null) continue;
 
-                // Link候補を追加
                 seeds.Add(new LaneLinkSeed
                 {
-                    TurnDirection = turnDirection,
+                    TurnDirection = turn,
                     NextLane = targetLane
                 });
             }
 
-            // Linkを反映
             ApplyLaneLinks(sourceLane, seeds);
         }
     }
-
     /// <summary>
     /// LaneLinkSeedのリストを元に、LaneのnextLaneLinksを上書きする
     /// </summary>
@@ -1010,7 +1019,8 @@ public class WayGeneratorWindow : EditorWindow
         for (int i = 0; i < lanes.Count; ++i)
         {
             Lane lane = lanes[i];
-            if (lane != null && lane.StartPoint != null && lane.EndPoint != null)
+            // 非アクティブなレーンは扱わない
+            if (lane != null && lane.gameObject != null && lane.gameObject.activeInHierarchy && lane.StartPoint != null && lane.EndPoint != null)
             {
                 baseLane = lane;
                 break;
@@ -1022,7 +1032,7 @@ public class WayGeneratorWindow : EditorWindow
             return false;
         }
 
-        Vector3 forwardAtTo = baseLane.EndPoint.position - baseLane.StartPoint.position;
+        Vector3 forwardAtTo = (baseLane.StartPoint.position - baseLane.EndPoint.position).normalized;
         forwardAtTo.y = 0f;
         if (forwardAtTo.sqrMagnitude <= 1e-6f)
         {

@@ -1,82 +1,108 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
 
+/// <summary>
+/// 選択中の道路標識をグリッド上へ配置する
+/// </summary>
 public sealed class RoadSignPlacementController : MonoBehaviour
 {
     [Header("配置設定")]
-    [SerializeField] private Camera targetCamera = null;
-    [SerializeField] private LayerMask placementLayers = ~0;
     [SerializeField] private Transform placementForwardSource = null;
-    [SerializeField] private Transform snapPointRoot = null;
-    [SerializeField] private float maxSnapDistance = 2.0f;
+    [SerializeField] private Vector3 gridOrigin = Vector3.zero;
+    [SerializeField] private float gridSize = 1.0f;
+    [SerializeField] private float groundRaycastHeight = 5.0f;
 
     [Header("UI連携")]
     [SerializeField] private RoadSignHandController handController = null;
-
+        
     [Header("Gizmos")]
-    [SerializeField] private float snapPointGizmoRadius = 0.15f;
-    [SerializeField] private bool drawSnapRange = true;
+    [SerializeField] private int gridGizmoExtent = 5;
+    [SerializeField] private float gridGizmoHeight = 0.02f;
+    [SerializeField] private float gridGizmoRadius = 0.05f;
 
-    private void Awake()
-    {
-        if (targetCamera == null)
+    /// <summary>
+    /// 選択中の標識を所有者の前方グリッドへ配置する
+    /// </summary>
+    public void PlaceSelectedAtForwardGrid()
+    {   
+        if (gridSize <= 0f)
         {
-            targetCamera = Camera.main;
+            return;
         }
-    }
 
-    private void Update()
-    {
-        if (Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame) return;
-        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
-        if (targetCamera == null || snapPointRoot == null) return;
+        if (!TryResolveSelectedSign(out RoadSignDefinition definition, out RoadSign signPrefab))
+        {
+            return;
+        }
 
-        Ray ray = targetCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
-        if (!Physics.Raycast(ray, out RaycastHit hit, 200f, placementLayers, QueryTriggerInteraction.Ignore)) return;
-        if (!TryResolveSelectedSign(out RoadSignDefinition definition, out RoadSign signPrefab)) return;
-        if (!TryFindNearestSnapPoint(hit.point, out Transform nearestSnapPoint)) return;
+        Vector3 basePoint = placementForwardSource != null ? placementForwardSource.position : transform.position;
+
+        Vector3 snappedPosition = ResolvePlacementPosition(basePoint);
 
         Quaternion rotation = ResolvePlacementRotation(signPrefab);
-        RoadSign instance = Instantiate(signPrefab, nearestSnapPoint.position, rotation);
+
+        RoadSign instance = Instantiate(signPrefab, snappedPosition, rotation);
         instance.SetDefinition(definition);
+
+        GameObject owner = ResolveOwner();
+        instance.SetOwner(owner);
     }
 
-    private bool TryFindNearestSnapPoint(Vector3 worldPosition, out Transform nearest)
+    /// <summary>
+    /// 前方位置をグリッドと地面の高さに合わせて配置位置を決定する
+    /// </summary>
+    private Vector3 ResolvePlacementPosition(Vector3 hitPoint)
     {
-        nearest = null;
-        if (snapPointRoot == null) return false;
+        Vector3 target = hitPoint;
 
-        float maxDistanceSqr = maxSnapDistance * maxSnapDistance;
-        float nearestDistanceSqr = maxDistanceSqr;
-
-        int childCount = snapPointRoot.childCount;
-        for (int i = 0; i < childCount; i++)
+        if (TryGetForwardDirection(out Vector3 forward))
         {
-            Transform child = snapPointRoot.GetChild(i);
-            Vector3 delta = child.position - worldPosition;
-            float distanceSqr = delta.sqrMagnitude;
-            if (distanceSqr > nearestDistanceSqr) continue;
-
-            nearest = child;
-            nearestDistanceSqr = distanceSqr;
+            target = placementForwardSource.position + forward.normalized * gridSize;
+            target.y = hitPoint.y;
         }
 
-        return nearest != null;
+        Vector3 snapped = SnapToGrid(target);
+        snapped.y = ResolveGroundHeight(snapped, hitPoint.y);
+        return snapped;
     }
 
+    /// <summary>
+    /// レイキャストで配置位置の地面の高さを取得する
+    /// </summary>
+    private float ResolveGroundHeight(Vector3 position, float fallbackHeight)
+    {
+        float rayHeight = Mathf.Max(0.1f, groundRaycastHeight);
+        Vector3 origin = position + Vector3.up * rayHeight;
+        if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, rayHeight * 2f, ~0, QueryTriggerInteraction.Ignore))
+        {
+            return hit.point.y;
+        }
+
+        return fallbackHeight;
+    }
+
+    /// <summary>
+    /// ワールド座標を設定されたグリッド間隔へ揃える
+    /// </summary>
+    private Vector3 SnapToGrid(Vector3 worldPosition)
+    {
+        Vector3 offset = worldPosition - gridOrigin;
+        float snappedX = Mathf.Round(offset.x / gridSize) * gridSize + gridOrigin.x;
+        float snappedZ = Mathf.Round(offset.z / gridSize) * gridSize + gridOrigin.z;
+        Vector3 snapped = new Vector3(snappedX, worldPosition.y, snappedZ);
+        return snapped;
+    }
+
+    /// <summary>
+    /// 配置元の前方を基準に標識の向きを決定する
+    /// </summary>
     private Quaternion ResolvePlacementRotation(RoadSign signPrefab)
     {
-        if (signPrefab == null) return Quaternion.identity;
-
-        if (placementForwardSource == null)
+        if (signPrefab == null)
         {
-            return signPrefab.transform.rotation;
+            return Quaternion.identity;
         }
 
-        Vector3 forward = placementForwardSource.forward;
-        forward.y = 0f;
-        if (forward.sqrMagnitude <= 1e-6f)
+        if (!TryGetForwardDirection(out Vector3 forward))
         {
             return signPrefab.transform.rotation;
         }
@@ -84,32 +110,85 @@ public sealed class RoadSignPlacementController : MonoBehaviour
         return Quaternion.LookRotation(forward.normalized, Vector3.up);
     }
 
+    /// <summary>
+    /// 標識を配置したプレイヤーを所有者として取得する
+    /// </summary>
+    private GameObject ResolveOwner()
+    {
+        if (placementForwardSource != null)
+        {
+            PlayerController forwardOwner = placementForwardSource.GetComponentInParent<PlayerController>();
+            if (forwardOwner != null)
+            {
+                return forwardOwner.gameObject;
+            }
+        }
+
+        PlayerController owner = GetComponentInParent<PlayerController>();
+        if (owner != null)
+        {
+            return owner.gameObject;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// 配置元から水平な前方方向を取得する
+    /// </summary>
+    private bool TryGetForwardDirection(out Vector3 forward)
+    {
+        forward = Vector3.zero;
+        if (placementForwardSource == null)
+        {
+            return false;
+        }
+
+        forward = placementForwardSource.forward;
+        forward.y = 0f;
+        bool isValid = forward.sqrMagnitude > 1e-6f;
+        return isValid;
+    }
+
+    /// <summary>
+    /// 選択中の手札を消費して標識定義とPrefabを取得する
+    /// </summary>
     private bool TryResolveSelectedSign(out RoadSignDefinition definition, out RoadSign signPrefab)
     {
         definition = null;
         signPrefab = null;
 
-        if (handController == null) return false;
+        if (handController == null)
+        {
+            return false;
+        }
 
-        return handController.TryConsumeSelected(out definition, out signPrefab);
+        bool resolved = handController.TryConsumeSelected(out definition, out signPrefab);
+        return resolved;
     }
 
+    /// <summary>
+    /// 選択中のオブジェクト周辺へ配置グリッドのGizmoを描画する
+    /// </summary>
     private void OnDrawGizmosSelected()
     {
-        if (snapPointRoot == null) return;
-
         Color prevColor = Gizmos.color;
 
-        int childCount = snapPointRoot.childCount;
-        for (int i = 0; i < childCount; i++)
+        if (gridSize > 0f && gridGizmoExtent > 0)
         {
-            Transform child = snapPointRoot.GetChild(i);
             Gizmos.color = Color.cyan;
-            Gizmos.DrawSphere(child.position, snapPointGizmoRadius);
-
-            if (!drawSnapRange) continue;
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(child.position, maxSnapDistance);
+            for (int x = -gridGizmoExtent; x <= gridGizmoExtent; x++)
+            {
+                for (int z = -gridGizmoExtent; z <= gridGizmoExtent; z++)
+                {
+                    Vector3 position = new Vector3(
+                        gridOrigin.x + x * gridSize,
+                        gridOrigin.y,
+                        gridOrigin.z + z * gridSize);
+                    Vector3 size = new Vector3(gridGizmoRadius, gridGizmoHeight, gridGizmoRadius);
+                    Gizmos.DrawCube(position, size);
+                }
+            }
         }
 
         Gizmos.color = prevColor;

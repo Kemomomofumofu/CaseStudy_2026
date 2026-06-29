@@ -25,6 +25,8 @@ public class CourseManager : MonoBehaviour
     // ----------------------------------------------------
     private void Start()
     {
+        Time.timeScale = 1.0f;
+
         if (resultUI == null)
         {
             Debug.LogError("【致命的エラー】CourseManagerにResult UIがセットされていません！");

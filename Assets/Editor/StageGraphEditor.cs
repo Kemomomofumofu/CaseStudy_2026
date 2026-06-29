@@ -1,5 +1,4 @@
 using UnityEditor;
-using UnityEditor;
 using UnityEditor.TerrainTools;
 using UnityEngine;
 using System.Collections.Generic;
@@ -48,6 +47,14 @@ public class StageGraphEditorWindow : EditorWindow
     private GameObject lanePrefab;
     private int selectedRoadIndex = -1;
 
+    // グリッド設定
+    private bool showGrid = true;
+    private bool snapToGrid = true;
+    private int gridCellCount = 10;
+    private Color gridColor = new Color(0.4f, 0.8f, 1f, 0.8f);
+    private float gridOffsetX = 0f;
+    private float gridOffsetY = 0f;
+
     [MenuItem("Tools/Stage Graph Editor")]
     public static void Open()
     {
@@ -58,90 +65,95 @@ public class StageGraphEditorWindow : EditorWindow
 
     private void OnGUI()
     {
-        GUILayout.Label(
-            "Stage Graph Editor",
-            EditorStyles.boldLabel
-        );
+        // ── タイトル ──
+        EditorGUILayout.LabelField("Stage Graph Editor", EditorStyles.boldLabel);
+        EditorGUILayout.Space(4);
 
-        stageTexture =
-            (Texture2D)EditorGUILayout.ObjectField(
-                "Stage Texture",
-                stageTexture,
-                typeof(Texture2D),
-                false
-            );
+        // ── アセット設定 ──
+        EditorGUILayout.LabelField("アセット設定", EditorStyles.boldLabel);
+        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+        {
+            stageTexture = (Texture2D)EditorGUILayout.ObjectField("Stage Texture", stageTexture, typeof(Texture2D), false);
+            intersectionPrefab = (GameObject)EditorGUILayout.ObjectField("Intersection Prefab", intersectionPrefab, typeof(GameObject), false);
+            wayPrefab = (GameObject)EditorGUILayout.ObjectField("Way Prefab", wayPrefab, typeof(GameObject), false);
+            lanePrefab = (GameObject)EditorGUILayout.ObjectField("Lane Prefab", lanePrefab, typeof(GameObject), false);
+        }
 
-        intersectionPrefab =
-            (GameObject)EditorGUILayout.ObjectField(
-                "Intersection Prefab",
-                intersectionPrefab,
-                typeof(GameObject),
-                false
-            );
 
-        wayPrefab =
-            (GameObject)EditorGUILayout.ObjectField(
-                "Way Prefab",
-                wayPrefab,
-                typeof(GameObject),
-                false
-            );
+        EditorGUILayout.Space(6);
 
-        lanePrefab =
-            (GameObject)EditorGUILayout.ObjectField(
-                "Lane Prefab",
-                lanePrefab,
-                typeof(GameObject),
-                false
-            );
-
-        GUILayout.Space(6);
+        // ── 編集モード ──
+        EditorGUILayout.LabelField("編集モード", EditorStyles.boldLabel);
         mode = (EditMode)GUILayout.Toolbar((int)mode, new string[] { "Select", "Add Node", "Connect" });
+        EditorGUILayout.Space(6);
 
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("Display Size", GUILayout.Width(80));
-        displaySize = EditorGUILayout.FloatField(displaySize, GUILayout.Width(80));
-        GUILayout.Label("Save Path", GUILayout.Width(60));
-        savePath = EditorGUILayout.TextField(savePath);
-        GUILayout.EndHorizontal();
+        // ── グリッド設定 ──
+        EditorGUILayout.LabelField("グリッド設定", EditorStyles.boldLabel);
+        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+        {
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                showGrid = EditorGUILayout.ToggleLeft("グリッド表示", showGrid, GUILayout.Width(110));
+                snapToGrid = EditorGUILayout.ToggleLeft("スナップ", snapToGrid, GUILayout.Width(90));
+            }
+            gridCellCount = Mathf.Max(2, EditorGUILayout.IntField("分割数", gridCellCount));
+            displaySize = EditorGUILayout.FloatField("表示サイズ (px)", displaySize);
+            gridColor = EditorGUILayout.ColorField("グリッド色", gridColor);
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField("オフセット", GUILayout.Width(70));
+                EditorGUILayout.LabelField("X", GUILayout.Width(12));
+                gridOffsetX = EditorGUILayout.Slider(gridOffsetX, -1f, 1f);
+            }
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField("", GUILayout.Width(70));
+                EditorGUILayout.LabelField("Y", GUILayout.Width(12));
+                gridOffsetY = EditorGUILayout.Slider(gridOffsetY, -1f, 1f);
+            }
+        }
+        EditorGUILayout.Space(6);
 
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Save Graph to JSON", GUILayout.Width(150)))
+        // ── ワールド設定 ──
+        EditorGUILayout.LabelField("ワールド設定", EditorStyles.boldLabel);
+        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
         {
-            SaveGraph();
+            worldWidth = EditorGUILayout.FloatField("World Width", worldWidth);
+            worldHeight = EditorGUILayout.FloatField("World Height", worldHeight);
+            networkAssetPath = EditorGUILayout.TextField("Network Asset Path", networkAssetPath);
+            savePath = EditorGUILayout.TextField("JSON Save Path", savePath);
         }
-        if (GUILayout.Button("Load Graph from JSON", GUILayout.Width(150)))
-        {
-            LoadGraph();
-        }
-        if (GUILayout.Button("Clear", GUILayout.Width(80)))
-        {
-            graph = new StageGraph();
-            selectedNodeId = null;
-        }
-        if (GUILayout.Button("Generate Scene + RoadNetworkAsset", GUILayout.Width(220)))
-        {
-            GenerateNetworkAsset();
-        }
-        GUILayout.EndHorizontal();
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("World Width", GUILayout.Width(80));
-        worldWidth = EditorGUILayout.FloatField(worldWidth, GUILayout.Width(80));
-        GUILayout.Label("World Height", GUILayout.Width(80));
-        worldHeight = EditorGUILayout.FloatField(worldHeight, GUILayout.Width(80));
-        GUILayout.EndHorizontal();
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("Network Asset Path", GUILayout.Width(120));
-        networkAssetPath = EditorGUILayout.TextField(networkAssetPath);
-        GUILayout.EndHorizontal();
+
+        EditorGUILayout.Space(6);
+
+        // ── 選択中の道路 ──
         if (selectedRoadIndex >= 0 && selectedRoadIndex < graph.roads.Count)
         {
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Lane Count", GUILayout.Width(80));
-            int newLaneCount = EditorGUILayout.IntField(graph.roads[selectedRoadIndex].laneCount, GUILayout.Width(60));
-            newLaneCount = Mathf.Max(1, newLaneCount);
-            graph.roads[selectedRoadIndex].laneCount = newLaneCount;
-            GUILayout.EndHorizontal();
+            EditorGUILayout.LabelField("選択中の道路", EditorStyles.boldLabel);
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                int newLaneCount = EditorGUILayout.IntField("レーン数", graph.roads[selectedRoadIndex].laneCount);
+                graph.roads[selectedRoadIndex].laneCount = Mathf.Max(1, newLaneCount);
+            }
+            EditorGUILayout.Space(4);
+        }
+        // ── 操作ボタン ──
+        EditorGUILayout.LabelField("操作", EditorStyles.boldLabel);
+        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+        {
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                if (GUILayout.Button("Save JSON")) SaveGraph();
+                if (GUILayout.Button("Load JSON")) LoadGraph();
+                if (GUILayout.Button("Clear"))
+                {
+                    graph = new StageGraph();
+                    selectedNodeId = null;
+                }
+            }
+            EditorGUILayout.Space(2);
+            if (GUILayout.Button("Generate Scene + RoadNetworkAsset", GUILayout.Height(30)))
+                GenerateNetworkAsset();
         }
     }
     private void OnEnable()
@@ -165,6 +177,43 @@ public class StageGraphEditorWindow : EditorWindow
         Rect rect = new Rect(10, 10, displaySize, displaySize);
         GUI.DrawTexture(rect, stageTexture, ScaleMode.ScaleToFit);
 
+        // グリッド描画
+        if (showGrid)
+        {
+            Color axisColor = new Color(gridColor.r, gridColor.g, gridColor.b, 1f);
+            Color borderColor = new Color(1f, 1f, 0f, 1f);
+            float step = 1f / gridCellCount;
+            // オフセットを1セル分の範囲に収める（繰り返しパターンなのでfmod）
+            float ox = ((gridOffsetX % step) + step) % step;
+            float oy = ((gridOffsetY % step) + step) % step;
+            // 外枠（常に固定）
+            EditorGUI.DrawRect(new Rect(rect.x, rect.y, rect.width, 2f), borderColor);
+            EditorGUI.DrawRect(new Rect(rect.x, rect.yMax - 2f, rect.width, 2f), borderColor);
+            EditorGUI.DrawRect(new Rect(rect.x, rect.y, 2f, rect.height), borderColor);
+            EditorGUI.DrawRect(new Rect(rect.xMax - 2f, rect.y, 2f, rect.height), borderColor);
+
+            // 内部グリッド線（オフセット適用）
+            for (int i = 1; i < gridCellCount; i++)
+            {
+                float tx = ox + i * step;
+                float ty = oy + i * step;
+                if (tx > 0f && tx < 1f)
+                {
+                    float x = rect.x + tx * rect.width;
+                    Color col = (Mathf.Abs(tx - 0.5f) < step * 0.1f) ? axisColor : gridColor;
+                    float lw = (Mathf.Abs(tx - 0.5f) < step * 0.1f) ? 2f : 1f;
+                    EditorGUI.DrawRect(new Rect(x, rect.y, lw, rect.height), col);
+                }
+                if (ty > 0f && ty < 1f)
+                {
+                    float y = rect.y + ty * rect.height;
+                    Color col = (Mathf.Abs(ty - 0.5f) < step * 0.1f) ? axisColor : gridColor;
+                    float lw = (Mathf.Abs(ty - 0.5f) < step * 0.1f) ? 2f : 1f;
+                    EditorGUI.DrawRect(new Rect(rect.x, y, rect.width, lw), col);
+                }
+            }
+        }
+
         Event e = Event.current;
 
         // Handle mouse clicks inside texture rect
@@ -178,6 +227,7 @@ public class StageGraphEditorWindow : EditorWindow
 
                 if (mode == EditMode.AddNode)
                 {
+                    normalized = SnapToGrid(normalized);
                     EditorNode n = new EditorNode { id = System.Guid.NewGuid().ToString(), position = normalized };
                     graph.intersections.Add(n);
                     e.Use();
@@ -241,7 +291,7 @@ public class StageGraphEditorWindow : EditorWindow
                 if (node != null)
                 {
                     Vector2 local = m - rect.position;
-                    Vector2 normalized = new Vector2(local.x / rect.width, local.y / rect.height);
+                    Vector2 normalized = SnapToGrid(new Vector2(local.x / rect.width, local.y / rect.height));
                     node.position = normalized;
                     e.Use();
                     Repaint();
@@ -279,6 +329,17 @@ public class StageGraphEditorWindow : EditorWindow
 
     }
 
+    private Vector2 SnapToGrid(Vector2 normalized)
+    {
+        if (!snapToGrid || gridCellCount <= 0) return normalized;
+        float step = 1f / gridCellCount;
+        float ox = ((gridOffsetX % step) + step) % step;
+        float oy = ((gridOffsetY % step) + step) % step;
+        return new Vector2(
+            Mathf.Round((normalized.x - ox) / step) * step + ox,
+            Mathf.Round((normalized.y - oy) / step) * step + oy);
+    }
+
     private string FindNodeUnderMouse(Rect rect, Vector2 mouse)
     {
         for (int i = 0; i < graph.intersections.Count; ++i)
@@ -314,7 +375,54 @@ public class StageGraphEditorWindow : EditorWindow
     }
 
 
+    private bool IsStraightNode(EditorNode node)
+    {
+        List<EditorRoad> connected = new();
 
+        foreach (var road in graph.roads)
+        {
+            if (road.from == node.id || road.to == node.id)
+            {
+                connected.Add(road);
+            }
+        }
+
+        if (connected.Count != 2)
+            return false;
+
+        EditorNode nodeA = null;
+        EditorNode nodeB = null;
+
+        foreach (var road in connected)
+        {
+            string otherId =
+                road.from == node.id
+                ? road.to
+                : road.from;
+
+            var other =
+                graph.intersections.Find(x => x.id == otherId);
+
+            if (nodeA == null)
+                nodeA = other;
+            else
+                nodeB = other;
+        }
+
+        if (nodeA == null || nodeB == null)
+            return false;
+
+        Vector2 dir1 =
+            (nodeA.position - node.position).normalized;
+
+        Vector2 dir2 =
+            (nodeB.position - node.position).normalized;
+
+        float angle =
+            Vector2.Angle(dir1, dir2);
+
+        return Mathf.Abs(angle - 180f) < 10f;
+    }
 
     private void SaveGraph()
     {
@@ -362,6 +470,14 @@ public class StageGraphEditorWindow : EditorWindow
             return;
         }
 
+        // Remove any previous generated parents to avoid duplicate/stale objects
+        var prevInterParent = GameObject.Find("StageGraph_Intersections");
+        if (prevInterParent != null)
+        {
+            Undo.DestroyObjectImmediate(prevInterParent);
+            Debug.Log("Removed existing StageGraph_Intersections before generation.");
+        }
+
         // Create parent object for intersections
         GameObject parent = new GameObject("StageGraph_Intersections");
         Undo.RegisterCreatedObjectUndo(parent, "Create Intersections Parent");
@@ -372,7 +488,9 @@ public class StageGraphEditorWindow : EditorWindow
         for (int i = 0; i < graph.intersections.Count; ++i)
         {
             var node = graph.intersections[i];
-            Vector3 pos = new Vector3((node.position.x - 0.5f) * worldWidth, 0f, (node.position.y - 0.5f) * worldHeight);
+            // Note: texture Y is normalized top->bottom. Convert to world Z with origin at center
+            // by flipping Y so that top of texture maps to positive Z consistently.
+            Vector3 pos = new Vector3((node.position.x - 0.5f) * worldWidth, 0f, (0.5f - node.position.y) * worldHeight);
             GameObject go;
             if (intersectionPrefab != null)
             {
@@ -390,6 +508,14 @@ public class StageGraphEditorWindow : EditorWindow
             go.transform.position = pos;
             Intersection inter = go.GetComponent<Intersection>() ?? go.AddComponent<Intersection>();
             map[node.id] = inter;
+        }
+
+        // Remove any previous generated ways parent to avoid duplicate/stale Way objects
+        var prevWaysParent = GameObject.Find("StageGraph_Ways");
+        if (prevWaysParent != null)
+        {
+            Undo.DestroyObjectImmediate(prevWaysParent);
+            Debug.Log("Removed existing StageGraph_Ways before generation.");
         }
 
         // Create Ways for each road
@@ -640,7 +766,10 @@ public class StageGraphEditorWindow : EditorWindow
                 for (int ti = 0; ti < turnDirections.Length; ++ti)
                 {
                     TurnDirection turnDirection = turnDirections[ti];
-                    Way targetWay = _intersection.GetWayByTurn(forwardAtTo.normalized, turnDirection);
+                    // GetWayByTurn expects a forward vector pointing from the intersection
+                    // into the incoming way's direction. Our forwardAtTo is from start->end
+                    // (toward the intersection), so invert it to match the intersection-local convention.
+                    Way targetWay = _intersection.GetWayByTurn((-forwardAtTo).normalized, turnDirection);
                     if (targetWay == null) continue;
                     Lane targetLane = GetLaneByIndexOrDefault_Local(targetWay, sourceLane.LaneIndex);
                     if (targetLane == null) continue;
