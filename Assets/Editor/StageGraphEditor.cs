@@ -54,6 +54,11 @@ public class StageGraphEditorWindow : EditorWindow
     private Color gridColor = new Color(0.4f, 0.8f, 1f, 0.8f);
     private float gridOffsetX = 0f;
     private float gridOffsetY = 0f;
+    private List<float> customGridX = new List<float>();
+    private List<float> customGridY = new List<float>();
+    private bool useCustomGrid = false;
+    private int draggedLineIndex = -1;
+    private bool draggedLineIsX = true;
 
     [MenuItem("Tools/Stage Graph Editor")]
     public static void Open()
@@ -99,17 +104,41 @@ public class StageGraphEditorWindow : EditorWindow
             gridCellCount = Mathf.Max(2, EditorGUILayout.IntField("分割数", gridCellCount));
             displaySize = EditorGUILayout.FloatField("表示サイズ (px)", displaySize);
             gridColor = EditorGUILayout.ColorField("グリッド色", gridColor);
-            using (new EditorGUILayout.HorizontalScope())
+            if (!useCustomGrid)
             {
-                EditorGUILayout.LabelField("オフセット", GUILayout.Width(70));
-                EditorGUILayout.LabelField("X", GUILayout.Width(12));
-                gridOffsetX = EditorGUILayout.Slider(gridOffsetX, -1f, 1f);
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.LabelField("オフセット", GUILayout.Width(70));
+                    EditorGUILayout.LabelField("X", GUILayout.Width(12));
+                    gridOffsetX = EditorGUILayout.Slider(gridOffsetX, -1f, 1f);
+                }
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.LabelField("", GUILayout.Width(70));
+                    EditorGUILayout.LabelField("Y", GUILayout.Width(12));
+                    gridOffsetY = EditorGUILayout.Slider(gridOffsetY, -1f, 1f);
+                }
+                if (GUILayout.Button("カスタムグリッドに変換"))
+                {
+                    GenerateCustomGridFromUniform();
+                    useCustomGrid = true;
+                }
             }
-            using (new EditorGUILayout.HorizontalScope())
+            else
             {
-                EditorGUILayout.LabelField("", GUILayout.Width(70));
-                EditorGUILayout.LabelField("Y", GUILayout.Width(12));
-                gridOffsetY = EditorGUILayout.Slider(gridOffsetY, -1f, 1f);
+                EditorGUILayout.HelpBox("Sceneビュー上でグリッド線をドラッグできます。右クリックで削除できます。", MessageType.Info);
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    if (GUILayout.Button("縦線を追加")) { customGridX.Add(0.5f); customGridX.Sort(); SceneView.RepaintAll(); }
+                    if (GUILayout.Button("横線を追加")) { customGridY.Add(0.5f); customGridY.Sort(); SceneView.RepaintAll(); }
+                }
+                if (GUILayout.Button("均等グリッドに戻す"))
+                {
+                    customGridX.Clear();
+                    customGridY.Clear();
+                    useCustomGrid = false;
+                    draggedLineIndex = -1;
+                }
             }
         }
         EditorGUILayout.Space(6);
@@ -180,41 +209,147 @@ public class StageGraphEditorWindow : EditorWindow
         // グリッド描画
         if (showGrid)
         {
-            Color axisColor = new Color(gridColor.r, gridColor.g, gridColor.b, 1f);
             Color borderColor = new Color(1f, 1f, 0f, 1f);
-            float step = 1f / gridCellCount;
-            // オフセットを1セル分の範囲に収める（繰り返しパターンなのでfmod）
-            float ox = ((gridOffsetX % step) + step) % step;
-            float oy = ((gridOffsetY % step) + step) % step;
             // 外枠（常に固定）
             EditorGUI.DrawRect(new Rect(rect.x, rect.y, rect.width, 2f), borderColor);
             EditorGUI.DrawRect(new Rect(rect.x, rect.yMax - 2f, rect.width, 2f), borderColor);
             EditorGUI.DrawRect(new Rect(rect.x, rect.y, 2f, rect.height), borderColor);
             EditorGUI.DrawRect(new Rect(rect.xMax - 2f, rect.y, 2f, rect.height), borderColor);
 
-            // 内部グリッド線（オフセット適用）
-            for (int i = 1; i < gridCellCount; i++)
+            if (useCustomGrid)
             {
-                float tx = ox + i * step;
-                float ty = oy + i * step;
-                if (tx > 0f && tx < 1f)
+                for (int i = 0; i < customGridX.Count; i++)
                 {
-                    float x = rect.x + tx * rect.width;
-                    Color col = (Mathf.Abs(tx - 0.5f) < step * 0.1f) ? axisColor : gridColor;
-                    float lw = (Mathf.Abs(tx - 0.5f) < step * 0.1f) ? 2f : 1f;
+                    float x = rect.x + customGridX[i] * rect.width;
+                    bool hovered = draggedLineIndex == i && draggedLineIsX;
+                    Color col = hovered ? Color.yellow : gridColor;
+                    float lw = hovered ? 3f : 2f;
                     EditorGUI.DrawRect(new Rect(x, rect.y, lw, rect.height), col);
                 }
-                if (ty > 0f && ty < 1f)
+                for (int i = 0; i < customGridY.Count; i++)
                 {
-                    float y = rect.y + ty * rect.height;
-                    Color col = (Mathf.Abs(ty - 0.5f) < step * 0.1f) ? axisColor : gridColor;
-                    float lw = (Mathf.Abs(ty - 0.5f) < step * 0.1f) ? 2f : 1f;
+                    float y = rect.y + customGridY[i] * rect.height;
+                    bool hovered = draggedLineIndex == i && !draggedLineIsX;
+                    Color col = hovered ? Color.yellow : gridColor;
+                    float lw = hovered ? 3f : 2f;
                     EditorGUI.DrawRect(new Rect(rect.x, y, rect.width, lw), col);
+                }
+            }
+            else
+            {
+                Color axisColor = new Color(gridColor.r, gridColor.g, gridColor.b, 1f);
+                float step = 1f / gridCellCount;
+                // オフセットを1セル分の範囲に収める（繰り返しパターンなのでfmod）
+                float ox = ((gridOffsetX % step) + step) % step;
+                float oy = ((gridOffsetY % step) + step) % step;
+
+                // 内部グリッド線（オフセット適用）
+                for (int i = 1; i < gridCellCount; i++)
+                {
+                    float tx = ox + i * step;
+                    float ty = oy + i * step;
+                    if (tx > 0f && tx < 1f)
+                    {
+                        float x = rect.x + tx * rect.width;
+                        Color col = (Mathf.Abs(tx - 0.5f) < step * 0.1f) ? axisColor : gridColor;
+                        float lw = (Mathf.Abs(tx - 0.5f) < step * 0.1f) ? 2f : 1f;
+                        EditorGUI.DrawRect(new Rect(x, rect.y, lw, rect.height), col);
+                    }
+                    if (ty > 0f && ty < 1f)
+                    {
+                        float y = rect.y + ty * rect.height;
+                        Color col = (Mathf.Abs(ty - 0.5f) < step * 0.1f) ? axisColor : gridColor;
+                        float lw = (Mathf.Abs(ty - 0.5f) < step * 0.1f) ? 2f : 1f;
+                        EditorGUI.DrawRect(new Rect(rect.x, y, rect.width, lw), col);
+                    }
                 }
             }
         }
 
         Event e = Event.current;
+
+        if (useCustomGrid && showGrid)
+        {
+            Vector2 m = e.mousePosition;
+
+            if (e.type == EventType.MouseDown && e.button == 0 && e.alt)
+            {
+                for (int i = 0; i < customGridX.Count; i++)
+                {
+                    float x = rect.x + customGridX[i] * rect.width;
+                    if (Mathf.Abs(m.x - x) <= 6f && m.y >= rect.y && m.y <= rect.yMax)
+                    {
+                        draggedLineIndex = i;
+                        draggedLineIsX = true;
+                        e.Use();
+                        break;
+                    }
+                }
+
+                if (draggedLineIndex == -1)
+                {
+                    for (int i = 0; i < customGridY.Count; i++)
+                    {
+                        float y = rect.y + customGridY[i] * rect.height;
+                        if (Mathf.Abs(m.y - y) <= 6f && m.x >= rect.x && m.x <= rect.xMax)
+                        {
+                            draggedLineIndex = i;
+                            draggedLineIsX = false;
+                            e.Use();
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (e.type == EventType.MouseDrag && e.button == 0 && draggedLineIndex != -1)
+            {
+                float normalized = draggedLineIsX
+                    ? Mathf.Clamp01((m.x - rect.x) / rect.width)
+                    : Mathf.Clamp01((m.y - rect.y) / rect.height);
+
+                if (draggedLineIsX)
+                    customGridX[draggedLineIndex] = normalized;
+                else
+                    customGridY[draggedLineIndex] = normalized;
+
+                e.Use();
+                Repaint();
+            }
+
+            if (e.type == EventType.MouseUp && e.button == 0)
+            {
+                draggedLineIndex = -1;
+                e.Use();
+            }
+
+            if (e.type == EventType.MouseDown && e.button == 1)
+            {
+                for (int i = customGridX.Count - 1; i >= 0; i--)
+                {
+                    float x = rect.x + customGridX[i] * rect.width;
+                    if (Mathf.Abs(m.x - x) <= 6f && m.y >= rect.y && m.y <= rect.yMax)
+                    {
+                        customGridX.RemoveAt(i);
+                        e.Use();
+                        Repaint();
+                        break;
+                    }
+                }
+
+                for (int i = customGridY.Count - 1; i >= 0; i--)
+                {
+                    float y = rect.y + customGridY[i] * rect.height;
+                    if (Mathf.Abs(m.y - y) <= 6f && m.x >= rect.x && m.x <= rect.xMax)
+                    {
+                        customGridY.RemoveAt(i);
+                        e.Use();
+                        Repaint();
+                        break;
+                    }
+                }
+            }
+        }
 
         // Handle mouse clicks inside texture rect
         if (e.type == EventType.MouseDown && e.button == 0)
@@ -331,13 +466,72 @@ public class StageGraphEditorWindow : EditorWindow
 
     private Vector2 SnapToGrid(Vector2 normalized)
     {
-        if (!snapToGrid || gridCellCount <= 0) return normalized;
+        if (!snapToGrid)
+            return normalized;
+
+        if (useCustomGrid)
+        {
+            if (customGridX.Count == 0 && customGridY.Count == 0)
+                return normalized;
+
+            float snappedX = normalized.x;
+            float snappedY = normalized.y;
+
+            if (customGridX.Count > 0)
+                snappedX = FindNearestValue(normalized.x, customGridX);
+            if (customGridY.Count > 0)
+                snappedY = FindNearestValue(normalized.y, customGridY);
+
+            return new Vector2(snappedX, snappedY);
+        }
+
+        if (gridCellCount <= 0) return normalized;
         float step = 1f / gridCellCount;
         float ox = ((gridOffsetX % step) + step) % step;
         float oy = ((gridOffsetY % step) + step) % step;
         return new Vector2(
             Mathf.Round((normalized.x - ox) / step) * step + ox,
             Mathf.Round((normalized.y - oy) / step) * step + oy);
+    }
+
+    private static float FindNearestValue(float value, List<float> values)
+    {
+        float nearest = values[0];
+        float nearestDist = Mathf.Abs(value - nearest);
+
+        for (int i = 1; i < values.Count; i++)
+        {
+            float dist = Mathf.Abs(value - values[i]);
+            if (dist < nearestDist)
+            {
+                nearest = values[i];
+                nearestDist = dist;
+            }
+        }
+
+        return nearest;
+    }
+
+    private void GenerateCustomGridFromUniform()
+    {
+        customGridX.Clear();
+        customGridY.Clear();
+
+        float step = 1f / gridCellCount;
+        float ox = ((gridOffsetX % step) + step) % step;
+        float oy = ((gridOffsetY % step) + step) % step;
+
+        for (int i = 1; i < gridCellCount; i++)
+        {
+            float tx = ox + i * step;
+            float ty = oy + i * step;
+            if (tx > 0f && tx < 1f) customGridX.Add(tx);
+            if (ty > 0f && ty < 1f) customGridY.Add(ty);
+        }
+
+        customGridX.Sort();
+        customGridY.Sort();
+        SceneView.RepaintAll();
     }
 
     private string FindNodeUnderMouse(Rect rect, Vector2 mouse)
