@@ -916,7 +916,7 @@ public class WayGeneratorWindow : EditorWindow
 
             List<LaneLinkSeed> seeds = new();
 
-            Vector3 incoming = (sourceLane.EndPoint.position - sourceLane.StartPoint.position);
+            Vector3 incoming = (sourceLane.StartPoint.position - sourceLane.EndPoint.position);
             incoming.y = 0;
             incoming.Normalize();
 
